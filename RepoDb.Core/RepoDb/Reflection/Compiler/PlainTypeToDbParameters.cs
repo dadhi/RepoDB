@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -73,7 +74,7 @@ namespace RepoDb.Reflection
             // Return
             return Expression
                 .Lambda<Action<DbCommand, object>>(Expression.Block(callExpressions), commandParameterExpression, entityParameterExpression)
-                .Compile();
+                .CompileFast(true);
         }
     }
 }

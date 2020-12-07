@@ -6,6 +6,7 @@ using System.Dynamic;
 using RepoDb.Extensions;
 using System.Collections.Generic;
 using RepoDb.Interfaces;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -39,7 +40,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Func<DbDataReader, ExpandoObject>>(body, readerParameterExpression)
-                .Compile();
+                .CompileFast(true);
         }
     }
 }

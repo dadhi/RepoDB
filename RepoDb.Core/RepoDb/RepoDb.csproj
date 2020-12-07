@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Michael Camara Pendon</Authors>
     <Version>1.12.5-beta4</Version>
@@ -42,6 +43,10 @@
     <Compile Remove="_SqlServer\**" />
     <EmbeddedResource Remove="_SqlServer\**" />
     <None Remove="_SqlServer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\FastExpressionCompiler\src\FastExpressionCompiler\FastExpressionCompiler.cs" />
   </ItemGroup>
 
   <ItemGroup>

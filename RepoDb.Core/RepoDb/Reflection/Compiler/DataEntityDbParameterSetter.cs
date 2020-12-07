@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq.Expressions;
 using RepoDb.Interfaces;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -69,7 +70,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Action<DbCommand, TEntity>>(Expression.Block(bodyExpressions), commandParameterExpression, entityParameterExpression)
-                .Compile();
+                .CompileFast(true);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using RepoDb.Interfaces;
 using System.Threading.Tasks;
 using RepoDb.Extensions;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -70,7 +71,7 @@ namespace RepoDb.Reflection
             // Return
             return Expression
                 .Lambda<Func<DbDataReader, TResult>>(expression, readerParameterExpression)
-                .Compile();
+                .CompileFast(true);
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Func<DbDataReader, TResult>>(entityExpression, readerParameterExpression)
-                .Compile();
+                .CompileFast(true);
         }
     }
 }

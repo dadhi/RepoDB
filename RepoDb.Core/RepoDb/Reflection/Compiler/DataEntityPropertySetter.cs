@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using RepoDb.Extensions;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -79,7 +80,8 @@ namespace RepoDb.Reflection
 
             // Return function
             return Expression.Lambda<Action<TEntity, object>>(propertyAssignment,
-                entityParameter, valueParameter).Compile();
+                entityParameter, valueParameter)
+                .CompileFast(true);
         }
     }
 }

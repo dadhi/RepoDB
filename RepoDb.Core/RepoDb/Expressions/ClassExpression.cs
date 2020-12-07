@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using FastExpressionCompiler;
 
 namespace RepoDb
 {
@@ -115,7 +116,7 @@ namespace RepoDb
                 // Set the function value
                 return Expression
                     .Lambda<Func<TEntity, TResult>>(body, obj)
-                    .Compile();
+                    .CompileFast(true);
             }
 
             /// <summary>
@@ -201,7 +202,7 @@ namespace RepoDb
                 var body = Expression.Constant(DataEntityExtension.GetProperties<TEntity>());
                 return Expression
                     .Lambda<Func<IEnumerable<ClassProperty>>>(body)
-                    .Compile();
+                    .CompileFast(true);
             }
 
             /// <summary>
@@ -275,9 +276,10 @@ namespace RepoDb
                     }));
 
                 // Set the function value
-                return Expression
-                    .Lambda<Func<TEntity, IEnumerable<PropertyValue>>>(body, obj)
-                    .Compile();
+                var lambdaExpr = Expression.Lambda<Func<TEntity, IEnumerable<PropertyValue>>>(body, obj);
+                var lambda = lambdaExpr
+                    .CompileFast(true);
+                return lambda;
             }
 
             /// <summary>

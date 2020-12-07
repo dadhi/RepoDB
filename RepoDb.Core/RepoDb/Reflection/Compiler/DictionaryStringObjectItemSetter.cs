@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using RepoDb.Extensions;
+using FastExpressionCompiler;
 
 namespace RepoDb.Reflection
 {
@@ -55,7 +56,8 @@ namespace RepoDb.Reflection
 
             // Return function
             return Expression.Lambda<Action<TEntity, object>>(itemAssignment,
-                dictionaryParameter, valueParameter).Compile();
+                dictionaryParameter, valueParameter)
+                .CompileFast(true);
         }
     }
 }
