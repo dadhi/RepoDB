@@ -72,11 +72,8 @@ namespace RepoDb
             else
             {
                 // Validate the objects
-                SqlConnectionExtension.ValidateTransactionConnectionObject(connection, transaction);
+                ValidateTransactionConnectionObject(connection, transaction);
             }
-
-            // Before Execution Time
-            var beforeExecutionTime = DateTime.UtcNow;
 
             // Must be fixed name so the RepoDb.Core caches will not be bloated
             var tempTableName = string.Concat("_RepoDb_BulkUpdate_", GetTableName(tableName, dbSetting));
@@ -113,20 +110,28 @@ namespace RepoDb
                     }
                 }
 
-                // Filter the fields (based on the data reader)
-                if (readerFields?.Any() == true)
-                {
-                    fields = fields
-                        .Where(e =>
-                            readerFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
-                }
-
-                // Filter the fields (based on the mappings)
+                // Filter the fields (based on the mappings and qualifiers)
                 if (mappings?.Any() == true)
                 {
                     fields = fields
                         .Where(e =>
-                            mappings.Any(m => string.Equals(m.SourceColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                            mappings.Any(m => string.Equals(m.DestinationColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true ||
+                            qualifiers.Any(q => string.Equals(q.Name, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                }
+                else
+                {
+                    // Filter the fields (based on the data reader)
+                    if (readerFields.Any() == true)
+                    {
+                        fields = fields
+                            .Where(e =>
+                                readerFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                    }
+
+                    // Filter the fields (based on the data table)
+                    mappings = fields?
+                        .Select(e =>
+                            new BulkInsertMapItem(e.Name, e.Name));
                 }
 
                 // Throw an error if there are no fields
@@ -139,11 +144,12 @@ namespace RepoDb
                 var sql = GetCreateTemporaryTableSqlText(tableName,
                     tempTableName,
                     fields,
-                    dbSetting);
+                    dbSetting,
+                    false);
                 connection.ExecuteNonQuery(sql, transaction: transaction);
 
                 // Set the options to KeepIdentity if needed
-                if (object.Equals(options, default(TSqlBulkCopyOptions)) &&
+                if (Equals(options, default(TSqlBulkCopyOptions)) &&
                     identityDbField?.IsIdentity == true &&
                     qualifiers?.Any(
                         field => string.Equals(field.Name, identityDbField?.Name, StringComparison.OrdinalIgnoreCase)) == true &&
@@ -153,24 +159,15 @@ namespace RepoDb
                     options = Compiler.GetEnumFunc<TSqlBulkCopyOptions>("KeepIdentity")();
                 }
 
-                // Filter the DB Fields
-                var filteredDbFields = dbFields?
-                    .Where(dbField =>
-                        fields?.Any(field => string.Equals(field.Name, dbField.Name, StringComparison.OrdinalIgnoreCase)) == true);
-
-                // Do the bulk insertion first
-                BulkInsertInternalBase<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
+                // WriteToServer
+                WriteToServerInternal<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
                     TSqlBulkCopyColumnMapping, TSqlTransaction>(connection,
                     tempTableName,
                     reader,
-                    filteredDbFields,
                     mappings,
                     options,
-                    null,
                     bulkCopyTimeout,
                     batchSize,
-                    false,
-                    false,
                     transaction);
 
                 // Create the clustered index
@@ -239,7 +236,6 @@ namespace RepoDb
         /// <param name="batchSize">The size per batch to be used.</param>
         /// <param name="usePhysicalPseudoTempTable">The flags that signify whether to create a physical pseudo table.</param>
         /// <param name="transaction">The transaction to be used.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
         internal static int BulkUpdateInternalBase<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
             TSqlBulkCopyColumnMapping, TSqlTransaction>(DbConnection connection,
@@ -261,7 +257,7 @@ namespace RepoDb
             where TSqlTransaction : DbTransaction
         {
             // Validate
-            if (dataTable?.Rows?.Count <= 0)
+            if (dataTable?.Rows.Count <= 0)
             {
                 return default;
             }
@@ -280,11 +276,8 @@ namespace RepoDb
             else
             {
                 // Validate the objects
-                SqlConnectionExtension.ValidateTransactionConnectionObject(connection, transaction);
+                ValidateTransactionConnectionObject(connection, transaction);
             }
-
-            // Before Execution Time
-            var beforeExecutionTime = DateTime.UtcNow;
 
             // Must be fixed name so the RepoDb.Core caches will not be bloated
             var tempTableName = string.Concat("_RepoDb_BulkUpdate_", GetTableName(tableName, dbSetting));
@@ -321,20 +314,28 @@ namespace RepoDb
                     }
                 }
 
-                // Filter the fields (based on the data table)
-                if (tableFields?.Any() == true)
-                {
-                    fields = fields
-                        .Where(e =>
-                            tableFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
-                }
-
-                // Filter the fields (based on the mappings)
+                // Filter the fields (based on the mappings and qualifiers)
                 if (mappings?.Any() == true)
                 {
                     fields = fields
                         .Where(e =>
-                            mappings.Any(m => string.Equals(m.SourceColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                            mappings.Any(m => string.Equals(m.DestinationColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true ||
+                            qualifiers.Any(q => string.Equals(q.Name, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                }
+                else
+                {
+                    // Filter the fields (based on the data table)
+                    if (tableFields?.Any() == true)
+                    {
+                        fields = fields
+                            .Where(e =>
+                                tableFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                    }
+
+                    // Filter the fields (based on the data table)
+                    mappings = fields?
+                        .Select(e =>
+                            new BulkInsertMapItem(e.Name, e.Name));
                 }
 
                 // Throw an error if there are no fields
@@ -347,11 +348,12 @@ namespace RepoDb
                 var sql = GetCreateTemporaryTableSqlText(tableName,
                     tempTableName,
                     fields,
-                    dbSetting);
+                    dbSetting,
+                    false);
                 connection.ExecuteNonQuery(sql, transaction: transaction);
 
                 // Set the options to KeepIdentity if needed
-                if (object.Equals(options, default(TSqlBulkCopyOptions)) &&
+                if (Equals(options, default(TSqlBulkCopyOptions)) &&
                     identityDbField?.IsIdentity == true &&
                     fields?.FirstOrDefault(
                         field => string.Equals(field.Name, identityDbField.Name, StringComparison.OrdinalIgnoreCase)) != null)
@@ -359,24 +361,16 @@ namespace RepoDb
                     options = Compiler.GetEnumFunc<TSqlBulkCopyOptions>("KeepIdentity")();
                 }
 
-                // Filter the DB Fields
-                var filteredDbFields = dbFields?
-                    .Where(dbField =>
-                        fields?.Any(field => string.Equals(field.Name, dbField.Name, StringComparison.OrdinalIgnoreCase)) == true);
-
-                // Do the bulk insertion first
-                BulkInsertInternalBase<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
+                // WriteToServer
+                WriteToServerInternal<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
                     TSqlBulkCopyColumnMapping, TSqlTransaction>(connection,
                     tempTableName,
                     dataTable,
                     rowState,
-                    filteredDbFields,
                     mappings,
                     options,
-                    null,
                     bulkCopyTimeout,
                     batchSize,
-                    false,
                     false,
                     transaction);
 
@@ -495,11 +489,8 @@ namespace RepoDb
             else
             {
                 // Validate the objects
-                SqlConnectionExtension.ValidateTransactionConnectionObject(connection, transaction);
+                ValidateTransactionConnectionObject(connection, transaction);
             }
-
-            // Before Execution Time
-            var beforeExecutionTime = DateTime.UtcNow;
 
             // Must be fixed name so the RepoDb.Core caches will not be bloated
             var tempTableName = string.Concat("_RepoDb_BulkUpdate_", GetTableName(tableName, dbSetting));
@@ -536,20 +527,28 @@ namespace RepoDb
                     }
                 }
 
-                // Filter the fields (based on the data reader)
-                if (readerFields?.Any() == true)
-                {
-                    fields = fields
-                        .Where(e =>
-                            readerFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
-                }
-
-                // Filter the fields (based on the mappings)
+                // Filter the fields (based on the mappings and qualifiers)
                 if (mappings?.Any() == true)
                 {
                     fields = fields
                         .Where(e =>
-                            mappings.Any(m => string.Equals(m.SourceColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                            mappings.Any(m => string.Equals(m.DestinationColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true ||
+                            qualifiers.Any(q => string.Equals(q.Name, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                }
+                else
+                {
+                    // Filter the fields (based on the data reader)
+                    if (readerFields.Any() == true)
+                    {
+                        fields = fields
+                            .Where(e =>
+                                readerFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                    }
+
+                    // Filter the fields (based on the data table)
+                    mappings = fields?
+                        .Select(e =>
+                            new BulkInsertMapItem(e.Name, e.Name));
                 }
 
                 // Throw an error if there are no fields
@@ -562,11 +561,12 @@ namespace RepoDb
                 var sql = GetCreateTemporaryTableSqlText(tableName,
                     tempTableName,
                     fields,
-                    dbSetting);
+                    dbSetting,
+                    false);
                 await connection.ExecuteNonQueryAsync(sql, transaction: transaction, cancellationToken: cancellationToken);
 
                 // Set the options to KeepIdentity if needed
-                if (object.Equals(options, default(TSqlBulkCopyOptions)) &&
+                if (Equals(options, default(TSqlBulkCopyOptions)) &&
                     identityDbField?.IsIdentity == true &&
                     fields?.FirstOrDefault(
                         field => string.Equals(field.Name, identityDbField.Name, StringComparison.OrdinalIgnoreCase)) != null)
@@ -574,24 +574,15 @@ namespace RepoDb
                     options = Compiler.GetEnumFunc<TSqlBulkCopyOptions>("KeepIdentity")();
                 }
 
-                // Filter the DB Fields
-                var filteredDbFields = dbFields?
-                    .Where(dbField =>
-                        fields?.Any(field => string.Equals(field.Name, dbField.Name, StringComparison.OrdinalIgnoreCase)) == true);
-
-                // Do the bulk insertion first
-                await BulkInsertAsyncInternalBase<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
+                // WriteToServer
+                await WriteToServerAsyncInternal<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
                     TSqlBulkCopyColumnMapping, TSqlTransaction>(connection,
                     tempTableName,
                     reader,
-                    filteredDbFields,
                     mappings,
                     options,
-                    hints,
                     bulkCopyTimeout,
                     batchSize,
-                    false,
-                    false,
                     transaction,
                     cancellationToken);
 
@@ -689,7 +680,7 @@ namespace RepoDb
             where TSqlTransaction : DbTransaction
         {
             // Validate
-            if (dataTable?.Rows?.Count <= 0)
+            if (dataTable?.Rows.Count <= 0)
             {
                 return default;
             }
@@ -708,11 +699,8 @@ namespace RepoDb
             else
             {
                 // Validate the objects
-                SqlConnectionExtension.ValidateTransactionConnectionObject(connection, transaction);
+                ValidateTransactionConnectionObject(connection, transaction);
             }
-
-            // Before Execution Time
-            var beforeExecutionTime = DateTime.UtcNow;
 
             // Must be fixed name so the RepoDb.Core caches will not be bloated
             var tempTableName = string.Concat("_RepoDb_BulkUpdate_", GetTableName(tableName, dbSetting));
@@ -749,20 +737,28 @@ namespace RepoDb
                     }
                 }
 
-                // Filter the fields (based on the data table)
-                if (tableFields?.Any() == true)
-                {
-                    fields = fields
-                        .Where(e =>
-                            tableFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
-                }
-
-                // Filter the fields (based on the mappings)
+                // Filter the fields (based on the mappings and qualifiers)
                 if (mappings?.Any() == true)
                 {
                     fields = fields
                         .Where(e =>
-                            mappings.Any(m => string.Equals(m.SourceColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                            mappings.Any(m => string.Equals(m.DestinationColumn, e.Name, StringComparison.OrdinalIgnoreCase)) == true ||
+                            qualifiers.Any(q => string.Equals(q.Name, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                }
+                else
+                {
+                    // Filter the fields (based on the data table)
+                    if (tableFields?.Any() == true)
+                    {
+                        fields = fields
+                            .Where(e =>
+                                tableFields.Any(fieldName => string.Equals(fieldName, e.Name, StringComparison.OrdinalIgnoreCase)) == true);
+                    }
+
+                    // Filter the fields (based on the data table)
+                    mappings = fields?
+                        .Select(e =>
+                            new BulkInsertMapItem(e.Name, e.Name));
                 }
 
                 // Throw an error if there are no fields
@@ -775,11 +771,12 @@ namespace RepoDb
                 var sql = GetCreateTemporaryTableSqlText(tableName,
                     tempTableName,
                     fields,
-                    dbSetting);
+                    dbSetting,
+                    false);
                 await connection.ExecuteNonQueryAsync(sql, transaction: transaction, cancellationToken: cancellationToken);
 
                 // Set the options to KeepIdentity if needed
-                if (object.Equals(options, default(TSqlBulkCopyOptions)) &&
+                if (Equals(options, default(TSqlBulkCopyOptions)) &&
                     identityDbField?.IsIdentity == true &&
                     fields?.FirstOrDefault(
                         field => string.Equals(field.Name, identityDbField.Name, StringComparison.OrdinalIgnoreCase)) != null)
@@ -787,24 +784,16 @@ namespace RepoDb
                     options = Compiler.GetEnumFunc<TSqlBulkCopyOptions>("KeepIdentity")();
                 }
 
-                // Filter the DB Fields
-                var filteredDbFields = dbFields?
-                    .Where(dbField =>
-                        fields?.Any(field => string.Equals(field.Name, dbField.Name, StringComparison.OrdinalIgnoreCase)) == true);
-
-                // Do the bulk insertion first
-                await BulkInsertAsyncInternalBase<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
+                // WriteToServer
+                await WriteToServerAsyncInternal<TSqlBulkCopy, TSqlBulkCopyOptions, TSqlBulkCopyColumnMappingCollection,
                     TSqlBulkCopyColumnMapping, TSqlTransaction>(connection,
                     tempTableName,
                     dataTable,
                     rowState,
-                    filteredDbFields,
                     mappings,
                     options,
-                    hints,
                     bulkCopyTimeout,
                     batchSize,
-                    false,
                     false,
                     transaction,
                     cancellationToken);

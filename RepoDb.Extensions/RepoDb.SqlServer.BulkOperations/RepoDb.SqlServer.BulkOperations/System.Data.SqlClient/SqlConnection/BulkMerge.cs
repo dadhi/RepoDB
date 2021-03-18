@@ -140,7 +140,6 @@ namespace RepoDb
                 hints: hints,
                 bulkCopyTimeout: bulkCopyTimeout,
                 batchSize: batchSize,
-                isReturnIdentity: false,
                 usePhysicalPseudoTempTable: usePhysicalPseudoTempTable,
                 transaction: transaction);
         }
@@ -185,7 +184,6 @@ namespace RepoDb
                 hints: hints,
                 bulkCopyTimeout: bulkCopyTimeout,
                 batchSize: batchSize,
-                isReturnIdentity: false,
                 usePhysicalPseudoTempTable: usePhysicalPseudoTempTable,
                 transaction: transaction);
         }
@@ -303,7 +301,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
             IEnumerable<TEntity> entities,
             Expression<Func<TEntity, object>> qualifiers = null,
             IEnumerable<BulkInsertMapItem> mappings = null,
@@ -317,7 +315,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: ClassMappedNameCache.Get<TEntity>(),
                 entities: entities,
                 qualifiers: ParseExpression(qualifiers),
@@ -350,7 +348,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
             string tableName,
             IEnumerable<TEntity> entities,
             Expression<Func<TEntity, object>> qualifiers = null,
@@ -365,7 +363,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: tableName,
                 entities: entities,
                 qualifiers: ParseExpression(qualifiers),
@@ -396,7 +394,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
             DbDataReader reader,
             Expression<Func<TEntity, object>> qualifiers = null,
             IEnumerable<BulkInsertMapItem> mappings = null,
@@ -409,7 +407,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: ClassMappedNameCache.Get<TEntity>(),
                 reader: reader,
                 qualifiers: ParseExpression(qualifiers),
@@ -418,7 +416,6 @@ namespace RepoDb
                 hints: hints,
                 bulkCopyTimeout: bulkCopyTimeout,
                 batchSize: batchSize,
-                isReturnIdentity: false,
                 usePhysicalPseudoTempTable: usePhysicalPseudoTempTable,
                 transaction: transaction,
                 cancellationToken: cancellationToken);
@@ -444,7 +441,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync(this SqlConnection connection,
             string tableName,
             DbDataReader reader,
             IEnumerable<Field> qualifiers = null,
@@ -457,7 +454,7 @@ namespace RepoDb
             SqlTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: tableName,
                 reader: reader,
                 qualifiers: qualifiers,
@@ -466,7 +463,6 @@ namespace RepoDb
                 hints: hints,
                 bulkCopyTimeout: bulkCopyTimeout,
                 batchSize: batchSize,
-                isReturnIdentity: false,
                 usePhysicalPseudoTempTable: usePhysicalPseudoTempTable,
                 transaction: transaction,
                 cancellationToken: cancellationToken);
@@ -490,7 +486,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync<TEntity>(this SqlConnection connection,
             DataTable dataTable,
             IEnumerable<Field> qualifiers = null,
             DataRowState? rowState = null,
@@ -505,7 +501,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: ClassMappedNameCache.Get<TEntity>(),
                 dataTable: dataTable,
                 qualifiers: qualifiers,
@@ -539,7 +535,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkMergeAsync(this SqlConnection connection,
+        public static Task<int> BulkMergeAsync(this SqlConnection connection,
             string tableName,
             DataTable dataTable,
             IEnumerable<Field> qualifiers = null,
@@ -554,7 +550,7 @@ namespace RepoDb
             SqlTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await BulkMergeAsyncInternal(connection: connection,
+            return BulkMergeAsyncInternal(connection: connection,
                 tableName: tableName,
                 dataTable: dataTable,
                 qualifiers: qualifiers,
@@ -630,7 +626,6 @@ namespace RepoDb
         /// <param name="hints"></param>
         /// <param name="bulkCopyTimeout"></param>
         /// <param name="batchSize"></param>
-        /// <param name="isReturnIdentity"></param>
         /// <param name="usePhysicalPseudoTempTable"></param>
         /// <param name="transaction"></param>
         /// <returns></returns>
@@ -643,7 +638,6 @@ namespace RepoDb
             string hints = null,
             int? bulkCopyTimeout = null,
             int? batchSize = null,
-            bool? isReturnIdentity = null,
             bool? usePhysicalPseudoTempTable = null,
             SqlTransaction transaction = null) =>
             BulkMergeInternalBase<SqlBulkCopy, SqlBulkCopyOptions, SqlBulkCopyColumnMappingCollection,
@@ -656,7 +650,6 @@ namespace RepoDb
                 hints,
                 bulkCopyTimeout,
                 batchSize,
-                isReturnIdentity,
                 usePhysicalPseudoTempTable,
                 transaction);
 
@@ -768,7 +761,6 @@ namespace RepoDb
         /// <param name="hints"></param>
         /// <param name="bulkCopyTimeout"></param>
         /// <param name="batchSize"></param>
-        /// <param name="isReturnIdentity"></param>
         /// <param name="usePhysicalPseudoTempTable"></param>
         /// <param name="transaction"></param>
         /// <param name="cancellationToken"></param>
@@ -782,7 +774,6 @@ namespace RepoDb
             string hints = null,
             int? bulkCopyTimeout = null,
             int? batchSize = null,
-            bool? isReturnIdentity = null,
             bool? usePhysicalPseudoTempTable = null,
             SqlTransaction transaction = null,
             CancellationToken cancellationToken = default) =>
@@ -796,7 +787,6 @@ namespace RepoDb
                 hints,
                 bulkCopyTimeout,
                 batchSize,
-                isReturnIdentity,
                 usePhysicalPseudoTempTable,
                 transaction,
                 cancellationToken);

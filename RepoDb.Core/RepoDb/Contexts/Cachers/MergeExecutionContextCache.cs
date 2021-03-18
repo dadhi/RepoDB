@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 namespace RepoDb.Contexts.Cachers
 {
     /// <summary>
-    /// A class that is used to cache the execution context of the Merge operation.
+    /// A class that is being used to cache the execution context of the Merge operation.
     /// </summary>
     public static class MergeExecutionContextCache
     {
@@ -36,8 +36,7 @@ namespace RepoDb.Contexts.Cachers
         internal static MergeExecutionContext<TEntity> Get<TEntity>(string key)
             where TEntity : class
         {
-            var result = (object)null;
-            if (cache.TryGetValue(key, out result))
+            if (cache.TryGetValue(key, out var result))
             {
                 return result as MergeExecutionContext<TEntity>;
             }

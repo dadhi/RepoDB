@@ -8,7 +8,7 @@ using System.Data.Common;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map the type of <see cref="DbConnection"/> into an instance of <see cref="IStatementBuilder"/> object.
+    /// A class that is being used to map the type of <see cref="DbConnection"/> into an instance of <see cref="IStatementBuilder"/> object.
     /// </summary>
     public static class StatementBuilderMapper
     {
@@ -37,7 +37,7 @@ namespace RepoDb
         public static void Add<TDbConnection>(IStatementBuilder statementBuilder,
             bool @override)
             where TDbConnection : DbConnection =>
-            Add(StaticType.DbConnection, statementBuilder, @override);
+            Add(typeof(TDbConnection), statementBuilder, @override);
 
         /// <summary>
         /// Adds a mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IStatementBuilder"/> object.
@@ -54,10 +54,9 @@ namespace RepoDb
 
             // Variables for cache
             var key = GenerateHashCode(connectionType);
-            var existing = (IStatementBuilder)null;
 
             // Try get the mappings
-            if (maps.TryGetValue(key, out existing))
+            if (maps.TryGetValue(key, out var existing))
             {
                 if (@override)
                 {
@@ -100,11 +99,8 @@ namespace RepoDb
             // Guard the type
             Guard(connectionType);
 
-            // Variables for the cache
-            var value = (IStatementBuilder)null;
-
             // get the value
-            maps.TryGetValue(GenerateHashCode(connectionType), out value);
+            maps.TryGetValue(GenerateHashCode(connectionType), out var value);
 
             // Return the value
             return value;
@@ -120,7 +116,7 @@ namespace RepoDb
         /// <typeparam name="TDbConnection">The type of <see cref="DbConnection"/>.</typeparam>
         public static void Remove<TDbConnection>()
             where TDbConnection : DbConnection =>
-            Remove(StaticType.DbConnection);
+            Remove(typeof(TDbConnection));
 
         /// <summary>
         /// Removes an existing mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IStatementBuilder"/> object.
@@ -173,7 +169,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// Throws an exception if the type is not a sublcass of type <see cref="DbConnection"/>.
+        /// Throws an exception if the type is not a subclass of type <see cref="DbConnection"/>.
         /// </summary>
         private static void Guard(Type type)
         {

@@ -10,6 +10,7 @@ using RepoDb.Attributes;
 using RepoDb.Interfaces;
 using RepoDb;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace RepoDb.IntegrationTests
 {
@@ -137,10 +138,55 @@ namespace RepoDb.IntegrationTests
                 };
             }
         }
+        public static List<EnumCompleteTable> CreateEnumCompleteTablesRandomized(int count)
+        {
+            var tables = new List<EnumCompleteTable>();
+            for (var i = 0; i < count; i++)
+            {
+                var direction = i % 2 == 0 ? Direction.West : Direction.East;
+                var index = i + 1;
+                tables.Add(new EnumCompleteTable
+                {
+                    SessionId = Guid.NewGuid(),
+                    ColumnBit = BooleanValue.True,
+                    ColumnNVarChar = direction,
+                    ColumnInt = direction,
+                    ColumnBigInt = direction,
+                    ColumnSmallInt = direction
+                });
+            }
+            return tables;
+        }
 
         #endregion
 
         #region EnumProperties (PropertyHandler)
+
+        #region ExecuteScalar
+
+        [TestMethod]
+        public void TestExecuteScalarForEnumWithPropertyHandlerFor()
+        {
+            // Setup
+            var entity = CreateEnumCompleteTableWithPropertyHandler();
+
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                // Act
+                var id = connection.ExecuteScalar<Guid>("INSERT INTO [dbo].[CompleteTable] " +
+                    "(SessionId, ColumnBit, ColumnNVarChar) " +
+                    "VALUES " +
+                    "(@SessionId, @ColumnBit, @ColumnNVarChar); " +
+                    "SELECT CONVERT(UNIQUEIDENTIFIER, @SessionId);", entity);
+
+                // Assert
+                Assert.AreEqual(1, connection.CountAll<EnumCompleteTableWithPropertyHandler>());
+                Assert.AreNotEqual(id, Guid.Empty);
+                Assert.AreEqual(entity.SessionId, id);
+            }
+        }
+
+        #endregion
 
         #region Insert
 
@@ -371,12 +417,13 @@ namespace RepoDb.IntegrationTests
         {
             // Setup
             var entities = Helper.CreateEnumCompleteTables(10);
+            var where = (Expression<Func<EnumCompleteTable, bool>>)(e => e.ColumnNVarChar == Direction.West);
 
             using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
             {
                 // Act
                 var insertAllResult = connection.InsertAll(entities);
-                var queryResult = connection.Query((System.Linq.Expressions.Expression<Func<EnumCompleteTable, bool>>)(e => e.ColumnNVarChar == Direction.West));
+                var queryResult = connection.Query(where);
 
                 // Assert
                 Assert.AreEqual(entities.Count, queryResult.Count());
@@ -437,6 +484,106 @@ namespace RepoDb.IntegrationTests
                 // Act
                 var insertAllResult = connection.InsertAll(entities);
                 var queryResult = connection.Query<EnumCompleteTable>(new QueryGroup(new QueryField("ColumnNVarChar", Direction.West)));
+
+                // Assert
+                Assert.AreEqual(entities.Count, queryResult.Count());
+
+                // Assert
+                entities.ForEach(entity => Helper.AssertPropertiesEquality(entity, queryResult.First(item => item.SessionId == entity.SessionId)));
+            }
+        }
+
+        #endregion
+
+        #region EnumAsParam in QueryGroup (OR)
+
+        [TestMethod]
+        public void TestQueryGroupForEnumForTextWithOrConditionViaExpression()
+        {
+            // Setup
+            var entities = CreateEnumCompleteTablesRandomized(10);
+            var where = (Expression<Func<EnumCompleteTable, bool>>)(e => e.ColumnNVarChar == Direction.West || e.ColumnNVarChar == Direction.East);
+
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                // Act
+                var insertAllResult = connection.InsertAll(entities);
+                var queryResult = connection.Query(where);
+
+                // Assert
+                Assert.AreEqual(entities.Count, queryResult.Count());
+
+                // Assert
+                entities.ForEach(entity => Helper.AssertPropertiesEquality(entity, queryResult.First(item => item.SessionId == entity.SessionId)));
+            }
+        }
+
+        [TestMethod]
+        public void TestQueryGroupForEnumForNonTextWithOrConditionViaExpression()
+        {
+            // Setup
+            var entities = CreateEnumCompleteTablesRandomized(10);
+            var where = (Expression<Func<EnumCompleteTable, bool>>)(e => e.ColumnInt == Direction.West || e.ColumnInt == Direction.East);
+
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                // Act
+                var insertAllResult = connection.InsertAll(entities);
+                var queryResult = connection.Query(where);
+
+                // Assert
+                Assert.AreEqual(entities.Count, queryResult.Count());
+
+                // Assert
+                entities.ForEach(entity => Helper.AssertPropertiesEquality(entity, queryResult.First(item => item.SessionId == entity.SessionId)));
+            }
+        }
+
+        [TestMethod]
+        public void TestQueryGroupForEnumsForTextWithOrConditionViaQueryGroup()
+        {
+            // Setup
+            var entities = CreateEnumCompleteTablesRandomized(10);
+            var fields = new[]
+            {
+                new QueryField("ColumnNVarChar", Direction.West),
+                new QueryField("ColumnNVarChar", Direction.East)
+            };
+            var where = new QueryGroup(fields, RepoDb.Enumerations.Conjunction.Or);
+
+
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                // Act
+                var insertAllResult = connection.InsertAll(entities);
+                var queryResult = connection.Query<EnumCompleteTable>(where);
+
+                // Assert
+                Assert.AreEqual(entities.Count, queryResult.Count());
+
+                // Assert
+                entities.ForEach(entity => Helper.AssertPropertiesEquality(entity, queryResult.First(item => item.SessionId == entity.SessionId)));
+            }
+        }
+
+        [TestMethod]
+        public void TestQueryGroupForEnumsForNonTextWithOrConditionViaQueryGroup()
+        {
+            // Setup
+            var entities = CreateEnumCompleteTablesRandomized(10);
+            var fields = new[]
+            {
+                new QueryField("ColumnInt", Direction.West),
+                new QueryField("ColumnInt", Direction.East)
+            };
+            var where = new QueryGroup(fields, RepoDb.Enumerations.Conjunction.Or);
+
+
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                // Act
+                var insertAllResult = connection.InsertAll(entities);
+                var queryResult = connection.Query<EnumCompleteTable>(where);
 
                 // Assert
                 Assert.AreEqual(entities.Count, queryResult.Count());
@@ -2057,6 +2204,141 @@ namespace RepoDb.IntegrationTests
         }
 
         #endregion
+
+        #endregion
+
+        #region custom enum mapping
+        private static CustomedMappingEnumPropertyHandler<TDbType, TEnum> CreateCustomedMappingEnumPropertyHandler<TEnum, TDbType>(
+            Dictionary<TEnum, TDbType> mapping)
+            => new CustomedMappingEnumPropertyHandler<TDbType, TEnum>(mapping);
+
+        public class CustomedMappingEnumPropertyHandler<TDbType, TEnum> : IPropertyHandler<TDbType, TEnum>
+        {
+            private readonly Dictionary<TDbType, TEnum> dbToEnum;
+            private readonly Dictionary<TEnum, TDbType> enumToDb;
+
+            public CustomedMappingEnumPropertyHandler(Dictionary<TEnum, TDbType> mapping)
+            {
+                enumToDb = mapping;
+                dbToEnum = mapping.ToDictionary(n => n.Value, n => n.Key);
+            }
+
+            public TEnum Get(TDbType input, ClassProperty property)
+                => input == null || !dbToEnum.TryGetValue(input, out var v) ? default(TEnum) : v;
+
+            public TDbType Set(TEnum input, ClassProperty property)
+                => input == null || !enumToDb.TryGetValue(input, out var v) ? default(TDbType) : v;
+        }
+
+        public class CustomedEnumModel<TEnum> where TEnum : struct
+        {
+            public TEnum? Value { get; set; }
+        }
+
+
+        public enum CustomedStringEnum { A, B }
+        private CustomedMappingEnumPropertyHandler<string, CustomedStringEnum?> customedStringEnumHandler =
+            CreateCustomedMappingEnumPropertyHandler(new Dictionary<CustomedStringEnum?, string>
+            {
+                [CustomedStringEnum.A] = "Special-A",
+                [CustomedStringEnum.B] = "Special-B"
+            });
+
+        public enum CustomedDecimalEnum { A, B }
+        private CustomedMappingEnumPropertyHandler<decimal?, CustomedDecimalEnum?> customedDecimalEnumHandler =
+            CreateCustomedMappingEnumPropertyHandler(new Dictionary<CustomedDecimalEnum?, decimal?>
+            {
+                [CustomedDecimalEnum.A] = 5.1m,
+                [CustomedDecimalEnum.B] = 6.2m
+            });
+
+        public enum CustomedFloatEnum { A, B }
+        private CustomedMappingEnumPropertyHandler<float?, CustomedFloatEnum?> customedFloatEnumHandler =
+            CreateCustomedMappingEnumPropertyHandler(new Dictionary<CustomedFloatEnum?, float?>
+            {
+                [CustomedFloatEnum.A] = 3.1f,
+                [CustomedFloatEnum.B] = 4.2f
+            });
+
+        private void EnsureCustomedMappingEnumPropertyHandler<TEnum>(object propertyHandler)
+        {
+            if (PropertyHandlerMapper.Get<object>(typeof(TEnum)) == null)
+            {
+                PropertyHandlerMapper.Add(typeof(TEnum), propertyHandler);
+            }
+        }
+
+        [TestMethod]
+        public void TestEnumGetFromStringWithPropertyHandler()
+        {
+            EnsureCustomedMappingEnumPropertyHandler<CustomedStringEnum>(customedStringEnumHandler);
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                var enumValue = connection.ExecuteQuery<CustomedStringEnum>("select 'Special-B'").First();
+                Assert.AreEqual(CustomedStringEnum.B, enumValue);
+
+                var nullEnumValue = connection.ExecuteQuery<CustomedStringEnum?>("select convert(varchar, null)").First();
+                Assert.IsNull(nullEnumValue);
+
+                var entry = connection.ExecuteQuery<CustomedEnumModel<CustomedStringEnum>>("select 'Special-B' Value").First();
+                Assert.AreEqual(CustomedStringEnum.B, entry.Value);
+
+                var nullEntry = connection.ExecuteQuery<CustomedEnumModel<CustomedStringEnum>>("select convert(varchar, null) Value").First();
+                Assert.IsNull(nullEntry.Value);
+            }
+        }
+
+        [TestMethod]
+        public void TestEnumSetFromStringWithPropertyHandler()
+        {
+            EnsureCustomedMappingEnumPropertyHandler<CustomedStringEnum>(customedStringEnumHandler);
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                var entry = new CustomedEnumModel<CustomedStringEnum> { Value = CustomedStringEnum.B };
+                var stringValue = connection.ExecuteQuery<string>("select @Value", entry).First();
+                Assert.AreEqual("Special-B", stringValue);
+
+                var nullEntry = new CustomedEnumModel<CustomedStringEnum> { Value = null };
+                var nullStringValue = connection.ExecuteQuery<string>("select @Value", nullEntry).First();
+                Assert.IsNull(nullStringValue);
+            }
+        }
+
+        [TestMethod]
+        public void TestEnumGetFromDecimalWithPropertyHandler()
+        {
+            EnsureCustomedMappingEnumPropertyHandler<CustomedDecimalEnum>(customedDecimalEnumHandler);
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                var enumValue = connection.ExecuteQuery<CustomedDecimalEnum>("select convert(decimal(8,3), 6.2)").First();
+                Assert.AreEqual(CustomedDecimalEnum.B, enumValue);
+
+                var nullEnumValue = connection.ExecuteQuery<CustomedDecimalEnum?>("select convert(decimal(8,3), null)").First();
+                Assert.IsNull(nullEnumValue);
+
+                var entry = connection.ExecuteQuery<CustomedEnumModel<CustomedDecimalEnum>>("select convert(decimal(8,3), 6.2) Value").First();
+                Assert.AreEqual(CustomedDecimalEnum.B, entry.Value);
+
+                var nullEntry = connection.ExecuteQuery<CustomedEnumModel<CustomedDecimalEnum>>("select convert(decimal(8,3), null) Value").First();
+                Assert.IsNull(nullEntry.Value);
+            }
+        }
+
+        [TestMethod]
+        public void TestEnumSetFromDecimalWithPropertyHandler()
+        {
+            EnsureCustomedMappingEnumPropertyHandler<CustomedDecimalEnum>(customedDecimalEnumHandler);
+            using (var connection = new SqlConnection(Database.ConnectionStringForRepoDb))
+            {
+                var entry = new CustomedEnumModel<CustomedDecimalEnum> { Value = CustomedDecimalEnum.B };
+                var decimalValue = connection.ExecuteQuery<decimal>("select @Value", entry).First();
+                Assert.AreEqual(6.2m, decimalValue);
+
+                var nullEntry = new CustomedEnumModel<CustomedDecimalEnum> { Value = null };
+                var nullDecimalValue = connection.ExecuteQuery<decimal?>("select convert(decimal, @Value)", nullEntry).First();
+                Assert.IsNull(nullDecimalValue);
+            }
+        }
 
         #endregion
     }

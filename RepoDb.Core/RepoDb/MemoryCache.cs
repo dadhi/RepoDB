@@ -12,15 +12,7 @@ namespace RepoDb
     /// </summary>
     public class MemoryCache : ICache
     {
-        private readonly ConcurrentDictionary<string, object> cache;
-
-        /// <summary>
-        /// Creates a new instance <see cref="MemoryCache"/> object.
-        /// </summary>
-        public MemoryCache()
-        {
-            cache = new ConcurrentDictionary<string, object>();
-        }
+        private readonly ConcurrentDictionary<string, object> cache = new();
 
         /// <summary>
         /// Adds a cache item value.
@@ -46,8 +38,7 @@ namespace RepoDb
             bool throwException = true)
         {
             var cacheItem = (CacheItem<T>)null;
-            var value = (object)null;
-            if (cache.TryGetValue(item.Key, out value))
+            if (cache.TryGetValue(item.Key, out var value))
             {
                 cacheItem = value as CacheItem<T>;
             }
@@ -81,8 +72,7 @@ namespace RepoDb
         /// <returns>A boolean value that signifies the presence of the key from the collection.</returns>
         public bool Contains(string key)
         {
-            var value = (object)null;
-            if (cache.TryGetValue(key, out value) == true)
+            if (cache.TryGetValue(key, out var value) == true)
             {
                 var expirable = value as IExpirable;
                 if (expirable != null)
@@ -104,8 +94,7 @@ namespace RepoDb
             bool throwException = true)
         {
             var item = (CacheItem<T>)null;
-            var value = (object)null;
-            if (cache.TryGetValue(key, out value))
+            if (cache.TryGetValue(key, out var value))
             {
                 item = value as CacheItem<T>;
             }

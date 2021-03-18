@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using RepoDb.Exceptions;
+﻿using RepoDb.Exceptions;
 using RepoDb.Extensions;
 using RepoDb.Interfaces;
 using RepoDb.SqlServer.BulkOperations;
@@ -9,7 +8,6 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,10 +26,10 @@ namespace RepoDb
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entities"></param>
         /// <param name="reader"></param>
-        /// <param name="identityDbField"></param>
+        /// <param name="identityField"></param>
         private static int SetIdentityForEntities<TEntity>(IEnumerable<TEntity> entities,
             DbDataReader reader,
-            DbField identityDbField)
+            Field identityField)
             where TEntity : class
         {
             var entityType = entities?.FirstOrDefault()?.GetType() ?? typeof(TEntity);
@@ -43,20 +41,25 @@ namespace RepoDb
                 while (reader.Read())
                 {
                     var value = Converter.DbNullToNull(reader.GetFieldValue<object>(0));
-                    var dictionary = (IDictionary<string, object>)list[result];
-                    dictionary[identityDbField.Name] = value;
+                    var index = reader.GetFieldValue<int>(1);
+                    var dictionary = (IDictionary<string, object>)list[index < 0 ? result : index];
+                    dictionary[identityField.Name] = value;
                     result++;
                 }
             }
             else
             {
-                var func = Compiler.GetPropertySetterFunc<TEntity>(identityDbField.Name);
-                while (reader.Read())
+                var func = Compiler.GetPropertySetterFunc<TEntity>(identityField.Name);
+                if (func != null)
                 {
-                    var value = Converter.DbNullToNull(reader.GetFieldValue<object>(0));
-                    var entity = list[result];
-                    func(entity, value);
-                    result++;
+                    while (reader.Read())
+                    {
+                        var value = Converter.DbNullToNull(reader.GetFieldValue<object>(0));
+                        var index = reader.GetFieldValue<int>(1);
+                        var entity = list[(index < 0 ? result : index)];
+                        func(entity, value);
+                        result++;
+                    }
                 }
             }
 
@@ -86,7 +89,8 @@ namespace RepoDb
                 while (await reader.ReadAsync(cancellationToken))
                 {
                     var value = Converter.DbNullToNull(await reader.GetFieldValueAsync<object>(0, cancellationToken));
-                    var dictionary = (IDictionary<string, object>)list[result];
+                    var index = await reader.GetFieldValueAsync<int>(1, cancellationToken);
+                    var dictionary = (IDictionary<string, object>)list[(index < 0 ? result : index)];
                     dictionary[identityDbField.Name] = value;
                     result++;
                 }
@@ -97,10 +101,57 @@ namespace RepoDb
                 while (await reader.ReadAsync(cancellationToken))
                 {
                     var value = Converter.DbNullToNull(await reader.GetFieldValueAsync<object>(0, cancellationToken));
-                    var entity = list[result];
+                    var index = await reader.GetFieldValueAsync<int>(1, cancellationToken);
+                    var entity = list[(index < 0 ? result : index)];
                     func(entity, value);
                     result++;
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <param name="reader"></param>
+        /// <param name="identityColumn"></param>
+        /// <returns></returns>
+        private static int SetIdentityForEntities(DataTable dataTable,
+            DbDataReader reader,
+            DataColumn identityColumn)
+        {
+            var result = 0;
+            while (reader.Read())
+            {
+                var value = Converter.DbNullToNull(reader.GetFieldValue<object>(0));
+                dataTable.Rows[result][identityColumn] = value;
+                result++;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <param name="reader"></param>
+        /// <param name="identityColumn"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private static async Task<int> SetIdentityForEntitiesAsync(DataTable dataTable,
+            DbDataReader reader,
+            DataColumn identityColumn,
+            CancellationToken cancellationToken = default)
+        {
+            var result = 0;
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var value = Converter.DbNullToNull(await reader.GetFieldValueAsync<object>(0, cancellationToken));
+                dataTable.Rows[result][identityColumn] = value;
+                result++;
             }
 
             return result;
@@ -212,6 +263,36 @@ namespace RepoDb
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="dataTable"></param>
+        /// <returns></returns>
+        private static void AddOrderColumn(DataTable dataTable)
+        {
+            if (dataTable == null)
+            {
+                return;
+            }
+            var column = new DataColumn("__RepoDb_OrderColumn", typeof(int));
+            dataTable.Columns.Add(column);
+            for (var i = 0; i < dataTable.Rows.Count; i++)
+            {
+                dataTable.Rows[i][column] = i;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mappings"></param>
+        private static IEnumerable<BulkInsertMapItem> AddOrderColumnMapping(IEnumerable<BulkInsertMapItem> mappings)
+        {
+            var list = mappings.AsList();
+            list.Add(new BulkInsertMapItem("__RepoDb_OrderColumn", "__RepoDb_OrderColumn"));
+            return list;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="fields"></param>
         /// <returns></returns>
         private static IEnumerable<BulkInsertMapItem> GetBulkInsertMapItemsFromFields(IEnumerable<Field> fields)
@@ -234,7 +315,7 @@ namespace RepoDb
             }
             if (reader.HasRows == false)
             {
-                throw new EmptyException("The reader must contain atleast a single row.");
+                throw new EmptyException("The reader must contain at least a single row.");
             }
         }
 
@@ -250,7 +331,7 @@ namespace RepoDb
             }
             if (dataTable.Rows.Count <= 0)
             {
-                throw new EmptyException("The data table must contain atleast a single row.");
+                throw new EmptyException("The data table must contain at least a single row.");
             }
         }
 
@@ -283,11 +364,13 @@ namespace RepoDb
         /// <param name="tempTableName"></param>
         /// <param name="fields"></param>
         /// <param name="dbSetting"></param>
+        /// <param name="isReturnIdentity"></param>
         /// <returns></returns>
         private static string GetCreateTemporaryTableSqlText(string tableName,
             string tempTableName,
             IEnumerable<Field> fields,
-            IDbSetting dbSetting)
+            IDbSetting dbSetting,
+            bool isReturnIdentity)
         {
             var builder = new QueryBuilder();
 
@@ -295,7 +378,16 @@ namespace RepoDb
             builder
                 .Clear()
                 .Select()
-                .FieldsFrom(fields, dbSetting)
+                .FieldsFrom(fields, dbSetting);
+
+            // Return Identity
+            if (isReturnIdentity)
+            {
+                builder.WriteText(", CONVERT(INT, NULL) AS [__RepoDb_OrderColumn]");
+            };
+
+            // Continuation
+            builder
                 .Into()
                 .WriteText(tempTableName.AsQuoted(dbSetting))
                 .From()
@@ -322,7 +414,7 @@ namespace RepoDb
             // Validate the presence
             if (qualifiers?.Any() != true)
             {
-                throw new MissingFieldException("There is no qualifer field(s) defined.");
+                throw new MissingFieldException("There is no qualifier field(s) defined.");
             }
 
             // Variables needed
@@ -375,7 +467,7 @@ namespace RepoDb
             // Validate the presence
             if (qualifiers?.Any() != true)
             {
-                throw new MissingFieldException("There is no qualifer field(s) defined.");
+                throw new MissingFieldException("There is no qualifier field(s) defined.");
             }
 
             // Variables needed
@@ -413,13 +505,15 @@ namespace RepoDb
         /// <param name="identityField"></param>
         /// <param name="hints"></param>
         /// <param name="dbSetting"></param>
+        /// <param name="isReturnIdentity"></param>
         /// <returns></returns>
         private static string GetBulkInsertSqlText(string tableName,
             string tempTableName,
             IEnumerable<Field> fields,
             Field identityField,
             string hints,
-            IDbSetting dbSetting)
+            IDbSetting dbSetting,
+            bool isReturnIdentity)
         {
             // Validate the presence
             if (fields?.Any() != true)
@@ -428,9 +522,6 @@ namespace RepoDb
             }
 
             // Variables needed
-            var setFields = fields
-                .Select(field => field.AsJoinQualifier("T", "S", dbSetting))
-                .Join(", ");
             var builder = new QueryBuilder();
 
             // Insertable fields
@@ -439,29 +530,65 @@ namespace RepoDb
 
             // Compose the statement
             builder.Clear()
-                .Insert()
-                .Into()
+                // MERGE T USING S
+                .Merge()
                 .TableNameFrom(tableName, dbSetting)
                 .HintsFrom(hints)
+                .As("T")
+                .Using()
                 .OpenParen()
-                .FieldsFrom(insertableFields, dbSetting)
-                .CloseParen();
+                .Select()
+                .Top()
+                .WriteText("100 PERCENT")
+                //.FieldsFrom(fields, dbSetting)
+                .WriteText("*") // Including the [__RepoDb_OrderColumn]
+                .From()
+                .TableNameFrom(tempTableName, dbSetting);
 
-            // Set the output
-            if (identityField != null)
+            // Return Identity
+            if (isReturnIdentity && identityField != null)
             {
                 builder
-                    .WriteText(string.Concat("OUTPUT INSERTED.", identityField.Name.AsField(dbSetting)))
-                    .As("[Result]");
+                    .OrderBy()
+                    .WriteText("[__RepoDb_OrderColumn]")
+                    .Ascending();
             }
 
             // Continuation
             builder
-                .Select()
+                .CloseParen()
+                .As("S")
+                // QUALIFIERS
+                .On()
+                .OpenParen()
+                .WriteText("1 = 0")
+                .CloseParen()
+                // WHEN NOT MATCHED THEN INSERT VALUES
+                .When()
+                .Not()
+                .Matched()
+                .Then()
+                .Insert()
+                .OpenParen()
                 .FieldsFrom(insertableFields, dbSetting)
-                .From()
-                .TableNameFrom(tempTableName, dbSetting)
-                .End();
+                .CloseParen()
+                .Values()
+                .OpenParen()
+                .AsAliasFieldsFrom(insertableFields, "S", dbSetting)
+                .CloseParen();
+
+            // Set the output
+            if (isReturnIdentity == true && identityField != null)
+            {
+                builder
+                    .WriteText(string.Concat("OUTPUT INSERTED.", identityField.Name.AsField(dbSetting)))
+                        .As("[Result],")
+                    .WriteText("S.[__RepoDb_OrderColumn]")
+                        .As("[OrderColumn]");
+            }
+
+            // End
+            builder.End();
 
             // Return the sql
             return builder.ToString();
@@ -498,13 +625,10 @@ namespace RepoDb
 
             if (qualifiers?.Any() != true)
             {
-                throw new MissingFieldException("There is no qualifer field(s) defined.");
+                throw new MissingFieldException("There is no qualifier field(s) defined.");
             }
 
             // Variables needed
-            var setFields = fields
-                .Select(field => field.AsJoinQualifier("T", "S", dbSetting))
-                .Join(", ");
             var builder = new QueryBuilder();
 
             // Insertable fields
@@ -528,15 +652,30 @@ namespace RepoDb
                 .Using()
                 .OpenParen()
                 .Select()
-                .FieldsFrom(fields, dbSetting)
+                .Top()
+                .WriteText("100 PERCENT")
+                //.FieldsFrom(fields, dbSetting)
+                .WriteText("*") // Including the [__RepoDb_OrderColumn]
                 .From()
-                .TableNameFrom(tempTableName, dbSetting)
+                .TableNameFrom(tempTableName, dbSetting);
+
+            // Return Identity
+            if (isReturnIdentity && identityField != null)
+            {
+                builder
+                    .OrderBy()
+                    .WriteText("[__RepoDb_OrderColumn]")
+                    .Ascending();
+            }
+
+            // Continuation
+            builder
                 .CloseParen()
                 .As("S")
                 // QUALIFIERS
                 .On()
                 .OpenParen()
-                .WriteText(qualifiers?
+                .WriteText(qualifiers
                     .Select(
                         field => field.AsJoinQualifier("S", "T", dbSetting))
                             .Join(" AND "))
@@ -563,11 +702,13 @@ namespace RepoDb
                 .FieldsAndAliasFieldsFrom(updateableFields, "T", "S", dbSetting);
 
             // Set the output
-            if (isReturnIdentity && identityField != null)
+            if (isReturnIdentity == true && identityField != null)
             {
                 builder
                     .WriteText(string.Concat("OUTPUT INSERTED.", identityField.Name.AsField(dbSetting)))
-                    .As("[Result]");
+                        .As("[Result],")
+                    .WriteText("S.[__RepoDb_OrderColumn]")
+                        .As("[OrderColumn]");
             }
 
             // End the builder
@@ -606,7 +747,7 @@ namespace RepoDb
 
             if (qualifiers?.Any() != true)
             {
-                throw new MissingFieldException("There is no qualifer field(s) defined.");
+                throw new MissingFieldException("There is no qualifier field(s) defined.");
             }
 
             // Variables needed

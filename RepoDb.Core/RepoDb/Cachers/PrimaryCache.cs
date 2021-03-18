@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the primary property of the data entity.
+    /// A class that is being used to cache the primary property of the data entity.
     /// </summary>
     public static class PrimaryCache
     {
@@ -33,11 +33,10 @@ namespace RepoDb
         public static ClassProperty Get(Type entityType)
         {
             // Variables for the cache
-            var property = (ClassProperty)null;
             var key = GenerateHashCode(entityType);
 
             // Try get the value
-            if (cache.TryGetValue(key, out property) == false)
+            if (cache.TryGetValue(key, out var property) == false)
             {
                 property = resolver.Resolve(entityType);
                 cache.TryAdd(key, property);

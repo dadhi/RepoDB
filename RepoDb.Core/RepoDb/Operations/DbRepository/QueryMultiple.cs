@@ -61,11 +61,6 @@ namespace RepoDb
                     trace: Trace,
                     statementBuilder: StatementBuilder);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -136,11 +131,6 @@ namespace RepoDb
                     transaction: transaction,
                     trace: Trace,
                     statementBuilder: StatementBuilder);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -227,11 +217,6 @@ namespace RepoDb
                     transaction: transaction,
                     trace: Trace,
                     statementBuilder: StatementBuilder);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -332,11 +317,6 @@ namespace RepoDb
                     transaction: transaction,
                     trace: Trace,
                     statementBuilder: StatementBuilder);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -451,11 +431,6 @@ namespace RepoDb
                     transaction: transaction,
                     trace: Trace,
                     statementBuilder: StatementBuilder);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -585,11 +560,6 @@ namespace RepoDb
                     trace: Trace,
                     statementBuilder: StatementBuilder);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -606,7 +576,7 @@ namespace RepoDb
         #region T1, T2
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 2 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 2 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -654,11 +624,6 @@ namespace RepoDb
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -671,7 +636,7 @@ namespace RepoDb
         #region T1, T2, T3
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 3 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 3 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -733,11 +698,6 @@ namespace RepoDb
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -750,7 +710,7 @@ namespace RepoDb
         #region T1, T2, T3, T4
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 4 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 4 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -827,11 +787,6 @@ namespace RepoDb
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -844,7 +799,7 @@ namespace RepoDb
         #region T1, T2, T3, T4, T5
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 5 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 5 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -935,11 +890,6 @@ namespace RepoDb
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -952,7 +902,7 @@ namespace RepoDb
         #region T1, T2, T3, T4, T5, T6
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 6 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 6 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -1057,11 +1007,6 @@ namespace RepoDb
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -1074,7 +1019,7 @@ namespace RepoDb
         #region T1, T2, T3, T4, T5, T6, T7
 
         /// <summary>
-        /// Query the data as multiple resultsets from the table based on the given 7 target types in an asychronous way.
+        /// Query the data as multiple resultsets from the table based on the given 7 target types in an asynchronous way.
         /// </summary>
         /// <typeparam name="T1">The first target type.</typeparam>
         /// <typeparam name="T2">The second target type.</typeparam>
@@ -1192,11 +1137,6 @@ namespace RepoDb
                     trace: Trace,
                     statementBuilder: StatementBuilder,
                     cancellationToken: cancellationToken);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {

@@ -46,7 +46,7 @@ namespace RepoDb
         public static QueryGroup Parse<TEntity>(Expression<Func<TEntity, bool>> expression)
             where TEntity : class
         {
-            // Guard the presense of the expression
+            // Guard the presence of the expression
             if (expression == null)
             {
                 throw new NullReferenceException("Expression cannot be null.");
@@ -56,7 +56,7 @@ namespace RepoDb
             var parsed = Parse<TEntity>(expression.Body);
 
             /*
-             * In order to NOT trigger the 'Equality' comparisson (via overriden GetHashCode()), do not use the '=='
+             * In order to NOT trigger the 'Equality' comparision (via overriden GetHashCode()), do not use the '=='
              * when comparing to NULLs, instead, use the ReferenceEquals method.
              */
 
@@ -131,7 +131,10 @@ namespace RepoDb
             else
             {
                 var rightQueryGroup = Parse<TEntity>(expression.Right);
-                return new QueryGroup(new[] { leftQueryGroup, rightQueryGroup }, GetConjunction(expression));
+                if (rightQueryGroup != null)
+                {
+                    return new QueryGroup(new[] { leftQueryGroup, rightQueryGroup }, GetConjunction(expression));
+                }
             }
 
             // Return
@@ -153,11 +156,11 @@ namespace RepoDb
         {
             var queryGroup = (QueryGroup)null;
 
-            if (expression.Operand?.IsMember() == true)
+            if (expression.Operand.IsMember() == true)
             {
                 queryGroup = Parse<TEntity>(expression.Operand.ToMember(), expression.NodeType);
             }
-            else if (expression.Operand?.IsMethodCall() == true)
+            else if (expression.Operand.IsMethodCall() == true)
             {
                 queryGroup = Parse<TEntity>(expression.Operand.ToMethodCall(), expression.NodeType);
             }

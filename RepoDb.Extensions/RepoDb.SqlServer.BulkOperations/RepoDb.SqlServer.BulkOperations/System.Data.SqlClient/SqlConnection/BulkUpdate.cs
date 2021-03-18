@@ -45,7 +45,6 @@ namespace RepoDb
         {
             using (var reader = new DataEntityDataReader<TEntity>(entities))
             {
-                reader.Initialize();
                 return BulkUpdateInternal(connection: connection,
                     tableName: ClassMappedNameCache.Get<TEntity>(),
                     reader: reader,
@@ -91,7 +90,6 @@ namespace RepoDb
         {
             using (var reader = new DataEntityDataReader<TEntity>(entities))
             {
-                reader.Initialize();
                 return BulkUpdateInternal(connection: connection,
                     tableName: tableName,
                     reader: reader,
@@ -311,7 +309,6 @@ namespace RepoDb
         {
             using (var reader = new DataEntityDataReader<TEntity>(entities))
             {
-                await reader.InitializeAsync(cancellationToken);
                 return await BulkUpdateAsyncInternal(connection: connection,
                     tableName: ClassMappedNameCache.Get<TEntity>(),
                     reader: reader,
@@ -360,7 +357,6 @@ namespace RepoDb
         {
             using (var reader = new DataEntityDataReader<TEntity>(entities))
             {
-                await reader.InitializeAsync(cancellationToken);
                 return await BulkUpdateAsyncInternal(connection: connection,
                     tableName: tableName,
                     reader: reader,
@@ -392,7 +388,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkUpdateAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkUpdateAsync<TEntity>(this SqlConnection connection,
             DbDataReader reader,
             Expression<Func<TEntity, object>> qualifiers = null,
             IEnumerable<BulkInsertMapItem> mappings = null,
@@ -405,7 +401,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkUpdateAsyncInternal(connection: connection,
+            return BulkUpdateAsyncInternal(connection: connection,
                 tableName: ClassMappedNameCache.Get<TEntity>(),
                 reader: reader,
                 qualifiers: ParseExpression(qualifiers),
@@ -439,7 +435,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkUpdateAsync(this SqlConnection connection,
+        public static Task<int> BulkUpdateAsync(this SqlConnection connection,
             string tableName,
             DbDataReader reader,
             IEnumerable<Field> qualifiers = null,
@@ -452,7 +448,7 @@ namespace RepoDb
             SqlTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await BulkUpdateAsyncInternal(connection: connection,
+            return BulkUpdateAsyncInternal(connection: connection,
                 tableName: tableName,
                 reader: reader,
                 qualifiers: qualifiers,
@@ -483,7 +479,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkUpdateAsync<TEntity>(this SqlConnection connection,
+        public static Task<int> BulkUpdateAsync<TEntity>(this SqlConnection connection,
             DataTable dataTable,
             IEnumerable<Field> qualifiers = null,
             DataRowState? rowState = null,
@@ -497,7 +493,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await BulkUpdateAsyncInternal(connection: connection,
+            return BulkUpdateAsyncInternal(connection: connection,
                 tableName: ClassMappedNameCache.Get<TEntity>(),
                 dataTable: dataTable,
                 qualifiers: qualifiers,
@@ -529,7 +525,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows affected by the execution.</returns>
-        public static async Task<int> BulkUpdateAsync(this SqlConnection connection,
+        public static Task<int> BulkUpdateAsync(this SqlConnection connection,
             string tableName,
             DataTable dataTable,
             IEnumerable<Field> qualifiers = null,
@@ -543,7 +539,7 @@ namespace RepoDb
             SqlTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await BulkUpdateAsyncInternal(connection: connection,
+            return BulkUpdateAsyncInternal(connection: connection,
                 tableName: tableName,
                 dataTable: dataTable,
                 qualifiers: qualifiers,

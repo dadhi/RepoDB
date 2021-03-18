@@ -5,12 +5,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to set a class property to be an identity property. This is an alternative class to <see cref="IdentityAttribute"/> object.
+    /// A class that is being used to set a class property to be an identity property. This is an alternative class to <see cref="IdentityAttribute"/> object.
     /// </summary>
     public static class IdentityMapper
     {
@@ -155,10 +154,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType);
-            var value = (ClassProperty)null;
 
             // Try get the cache
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -203,10 +201,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType);
-            var value = (ClassProperty)null;
 
             // Try get the value
-            maps.TryGetValue(key, out value);
+            maps.TryGetValue(key, out var value);
 
             // Return the value
             return value;
@@ -217,7 +214,7 @@ namespace RepoDb
          */
 
         /// <summary>
-        /// Removes the exising mapped identity property of the data entity type.
+        /// Removes the existing mapped identity property of the data entity type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         public static void Remove<TEntity>()
@@ -225,7 +222,7 @@ namespace RepoDb
             Remove(typeof(TEntity));
 
         /// <summary>
-        /// Removes the exising mapped identity property of the data entity type.
+        /// Removes the existing mapped identity property of the data entity type.
         /// </summary>
         /// <param name="entityType">The target type.</param>
         public static void Remove(Type entityType)

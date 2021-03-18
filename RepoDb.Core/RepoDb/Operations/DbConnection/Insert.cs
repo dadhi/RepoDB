@@ -186,7 +186,7 @@ namespace RepoDb
             IStatementBuilder statementBuilder = null)
             where TEntity : class
         {
-            if (entity?.GetType()?.IsDictionaryStringObject() == true)
+            if (entity?.GetType().IsDictionaryStringObject() == true)
             {
                 return InsertInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                     tableName: tableName,
@@ -398,7 +398,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            if (entity?.GetType()?.IsDictionaryStringObject() == true)
+            if (entity?.GetType().IsDictionaryStringObject() == true)
             {
                 return InsertAsyncInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                     tableName: tableName,
@@ -655,7 +655,7 @@ namespace RepoDb
                 // Actual Execution
                 result = Converter.ToType<TResult>(command.ExecuteScalar());
 
-                // Get explicity if needed
+                // Get explicitly if needed
                 if (Equals(result, default(TResult)) == true && dbSetting.IsMultiStatementExecutable == false)
                 {
                     result = Converter.ToType<TResult>(connection.GetDbHelper().GetScopeIdentity(connection, transaction));
@@ -669,11 +669,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterInsert(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterInsert(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -713,9 +710,6 @@ namespace RepoDb
         {
             // Variables needed
             var dbSetting = connection.GetDbSetting();
-
-            // Get the database fields
-            var dbFields = await DbFieldCache.GetAsync(connection, tableName, transaction, cancellationToken);
 
             // Get the context
             var context = await InsertExecutionContextProvider.CreateAsync<TEntity>(connection,
@@ -761,7 +755,7 @@ namespace RepoDb
                 // Actual Execution
                 result = Converter.ToType<TResult>(await command.ExecuteScalarAsync(cancellationToken));
 
-                // Get explicity if needed
+                // Get explicitly if needed
                 if (Equals(result, default(TResult)) == true && dbSetting.IsMultiStatementExecutable == false)
                 {
                     result = Converter.ToType<TResult>(await connection.GetDbHelper().GetScopeIdentityAsync(connection, transaction, cancellationToken));
@@ -775,11 +769,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterInsert(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterInsert(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

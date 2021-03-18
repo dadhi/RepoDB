@@ -7,15 +7,10 @@ using System.Reflection;
 namespace RepoDb.Resolvers
 {
     /// <summary>
-    /// A class that is used to resolve the equivalent <see cref="DbType"/> object of the property.
+    /// A class that is being used to resolve the equivalent <see cref="DbType"/> object of the property.
     /// </summary>
     public class TypeMapPropertyLevelResolver : IResolver<PropertyInfo, DbType?>
     {
-        /// <summary>
-        /// Creates a new instance of <see cref="TypeMapPropertyLevelResolver"/> object.
-        /// </summary>
-        public TypeMapPropertyLevelResolver() { }
-
         /// <summary>
         /// Resolves the equivalent <see cref="DbType"/> object of the property.
         /// </summary>
@@ -36,22 +31,6 @@ namespace RepoDb.Resolvers
             if (dbType == null)
             {
                 dbType = TypeMapper.Get(propertyInfo.DeclaringType, propertyInfo);
-            }
-
-            // Specialized
-            if (dbType == null)
-            {
-                var underlyingType = propertyInfo.PropertyType.GetUnderlyingType();
-                if (underlyingType == StaticType.ByteArray)
-                {
-                    dbType = DbType.Binary;
-                }
-            }
-
-            // Type Level
-            if (dbType == null)
-            {
-                dbType = TypeMapper.Get(propertyInfo.PropertyType);
             }
 
             // Return the value

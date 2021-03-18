@@ -44,7 +44,7 @@ namespace RepoDb.DbHelpers
         #region Helpers
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="tableName"></param>
         /// <returns></returns>
@@ -54,7 +54,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="identityFieldName"></param>
@@ -63,9 +63,9 @@ namespace RepoDb.DbHelpers
             string identityFieldName)
         {
             return new DbField(reader.GetString(1),
-                reader.IsDBNull(5) ? false : reader.GetBoolean(5),
+                !reader.IsDBNull(5) && reader.GetBoolean(5),
                 string.Equals(reader.GetString(1), identityFieldName, StringComparison.OrdinalIgnoreCase),
-                reader.IsDBNull(3) ? true : reader.GetBoolean(3) == false,
+                reader.IsDBNull(3) || reader.GetBoolean(3) == false,
                 reader.IsDBNull(2) ? DbTypeResolver.Resolve("text") : DbTypeResolver.Resolve(reader.GetString(2)),
                 null,
                 null,
@@ -74,7 +74,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="identityFieldName"></param>
@@ -85,9 +85,9 @@ namespace RepoDb.DbHelpers
             CancellationToken cancellationToken = default)
         {
             return new DbField(await reader.GetFieldValueAsync<string>(1, cancellationToken),
-                await reader.IsDBNullAsync(5, cancellationToken) ? false : Convert.ToBoolean(await reader.GetFieldValueAsync<long>(5, cancellationToken)),
+                !await reader.IsDBNullAsync(5, cancellationToken) && Convert.ToBoolean(await reader.GetFieldValueAsync<long>(5, cancellationToken)),
                 string.Equals(await reader.GetFieldValueAsync<string>(1, cancellationToken), identityFieldName, StringComparison.OrdinalIgnoreCase),
-                await reader.IsDBNullAsync(3, cancellationToken) ? true : Convert.ToBoolean(await reader.GetFieldValueAsync<long>(3, cancellationToken)) == false,
+                await reader.IsDBNullAsync(3, cancellationToken) || Convert.ToBoolean(await reader.GetFieldValueAsync<long>(3, cancellationToken)) == false,
                 await reader.IsDBNullAsync(2, cancellationToken) ? DbTypeResolver.Resolve("text") : DbTypeResolver.Resolve(await reader.GetFieldValueAsync<string>(2, cancellationToken)),
                 null,
                 null,
@@ -96,7 +96,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TDbConnection"></typeparam>
         /// <param name="connection"></param>
@@ -119,7 +119,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TDbConnection"></typeparam>
         /// <param name="connection"></param>
@@ -145,7 +145,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sql"></param>
         /// <returns></returns>
@@ -171,18 +171,21 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="field"></param>
         /// <returns></returns>
-        private bool IsIdentity(string field) =>
-            field.ToUpper().Contains("AUTOINCREMENT") ||
-            field.ToUpper().Contains("INTEGER PRIMARY KEY") ||
-            (field.ToUpper().Contains("INTEGER") && field.ToUpper().Contains("PRIMARY KEY")) ||
-            (field.ToUpper().Contains("INTEGER") && field.ToUpper().Contains("PRIMARY") && field.ToUpper().Contains("KEY"));
+        private bool IsIdentity(string field)
+        {
+            var upper = field.ToUpper();
+            return upper.Contains("AUTOINCREMENT") ||
+                   upper.Contains("INTEGER PRIMARY KEY") ||
+                   (upper.Contains("INTEGER") && upper.Contains("PRIMARY KEY")) ||
+                   (upper.Contains("INTEGER") && upper.Contains("PRIMARY") && upper.Contains("KEY"));
+        }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sql"></param>
         /// <returns></returns>
@@ -243,7 +246,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// Gets the list of <see cref="DbField"/> of the table in an asychronous way.
+        /// Gets the list of <see cref="DbField"/> of the table in an asynchronous way.
         /// </summary>
         /// <param name="connection">The instance of the connection object.</param>
         /// <param name="tableName">The name of the target table.</param>
@@ -292,17 +295,17 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// Gets the newly generated identity from the database in an asychronous way.
+        /// Gets the newly generated identity from the database in an asynchronous way.
         /// </summary>
         /// <param name="connection">The instance of the connection object.</param>
         /// <param name="transaction">The transaction object that is currently in used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The newly generated identity from the database.</returns>
-        public async Task<object> GetScopeIdentityAsync(IDbConnection connection,
+        public Task<object> GetScopeIdentityAsync(IDbConnection connection,
             IDbTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await connection.ExecuteScalarAsync("SELECT last_insert_rowid();", transaction: transaction,
+            return connection.ExecuteScalarAsync("SELECT last_insert_rowid();", transaction: transaction,
                 cancellationToken: cancellationToken);
         }
 

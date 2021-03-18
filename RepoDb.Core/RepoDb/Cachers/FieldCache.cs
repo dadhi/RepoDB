@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the list of <see cref="Field"/> objects of the data entity.
+    /// A class that is being used to cache the list of <see cref="Field"/> objects of the data entity.
     /// </summary>
     public static class FieldCache
     {
@@ -37,11 +36,10 @@ namespace RepoDb
             }
 
             // Variables
-            var result = (IEnumerable<Field>)null;
             var key = GenerateHashCode(entityType);
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 result = entityType.AsFields();
                 cache.TryAdd(key, result);

@@ -6,7 +6,7 @@ using System.Data;
 namespace RepoDb.Resolvers
 {
     /// <summary>
-    /// A class that is used to resolve the .NET CLR Types into its equivalent SQL Server <see cref="DbType"/> value.
+    /// A class that is being used to resolve the .NET CLR Types into its equivalent SQL Server <see cref="DbType"/> value.
     /// </summary>
     public class ClientTypeToDbTypeResolver : IResolver<Type, DbType?>
     {
@@ -26,8 +26,12 @@ namespace RepoDb.Resolvers
             {
                 throw new NullReferenceException("The type must not be null.");
             }
+            if (type.IsEnum)
+            {
+                return null;
+            }
 
-            type = type?.GetUnderlyingType();
+            type = type.GetUnderlyingType();
 
             if (type == StaticType.Int64)
             {

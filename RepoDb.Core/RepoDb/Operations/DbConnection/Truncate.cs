@@ -316,11 +316,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterTruncate(new TraceLog(sessionId, commandText, null, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterTruncate(new TraceLog(sessionId, commandText, null, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -331,7 +328,7 @@ namespace RepoDb
         #region TruncateAsyncInternalBase
 
         /// <summary>
-        /// Truncates a table from the database in an asychronous way.
+        /// Truncates a table from the database in an asynchronous way.
         /// </summary>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="request">The actual <see cref="TruncateRequest"/> object.</param>
@@ -384,11 +381,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterTruncate(new TraceLog(sessionId, commandText, null, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterTruncate(new TraceLog(sessionId, commandText, null, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

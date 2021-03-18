@@ -8,7 +8,7 @@ using System.Data.Common;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map a type of <see cref="DbConnection"/> into an instance of <see cref="IDbHelper"/> object.
+    /// A class that is being used to map a type of <see cref="DbConnection"/> into an instance of <see cref="IDbHelper"/> object.
     /// </summary>
     public static class DbHelperMapper
     {
@@ -33,7 +33,7 @@ namespace RepoDb
         public static void Add<TDbConnection>(IDbHelper dbHelper,
             bool @override)
             where TDbConnection : DbConnection =>
-            Add(StaticType.DbConnection, dbHelper, @override);
+            Add(typeof(TDbConnection), dbHelper, @override);
 
         /// <summary>
         /// Adds a mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IDbHelper"/> object.
@@ -50,10 +50,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(connectionType);
-            var existing = (IDbHelper)null;
 
             // Try get the mappings
-            if (maps.TryGetValue(key, out existing))
+            if (maps.TryGetValue(key, out var existing))
             {
                 if (@override)
                 {
@@ -96,11 +95,8 @@ namespace RepoDb
             // Guard the type
             Guard(connectionType);
 
-            // Variables for the cache
-            var value = (IDbHelper)null;
-
             // get the value
-            maps.TryGetValue(GenerateHashCode(connectionType), out value);
+            maps.TryGetValue(GenerateHashCode(connectionType), out var value);
 
             // Return the value
             return value;
@@ -116,7 +112,7 @@ namespace RepoDb
         /// <typeparam name="TDbConnection">The type of <see cref="DbConnection"/>.</typeparam>
         public static void Remove<TDbConnection>()
             where TDbConnection : DbConnection =>
-            Remove(StaticType.DbConnection);
+            Remove(typeof(TDbConnection));
 
         /// <summary>
         /// Removes the mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IDbHelper"/> object.

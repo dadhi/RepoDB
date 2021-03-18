@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -580,7 +579,7 @@ namespace RepoDb
             IStatementBuilder statementBuilder = null)
             where TEntity : class
         {
-            if (entity?.GetType()?.IsDictionaryStringObject() == true)
+            if (entity?.GetType().IsDictionaryStringObject() == true)
             {
                 return UpdateInternalBase<IDictionary<string, object>>(connection: connection,
                     tableName: tableName,
@@ -1216,7 +1215,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            if (entity?.GetType()?.IsDictionaryStringObject() == true)
+            if (entity?.GetType().IsDictionaryStringObject() == true)
             {
                 return UpdateAsyncInternalBase<IDictionary<string, object>>(connection: connection,
                     tableName: tableName,
@@ -1722,11 +1721,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterUpdate(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterUpdate(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -1819,11 +1815,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterUpdate(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterUpdate(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

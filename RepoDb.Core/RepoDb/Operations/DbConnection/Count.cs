@@ -198,7 +198,7 @@ namespace RepoDb
                 statementBuilder);
             var param = (object)null;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo<TEntity>() });
@@ -414,7 +414,7 @@ namespace RepoDb
                 statementBuilder);
             var param = (object)null;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo<TEntity>() });
@@ -588,7 +588,7 @@ namespace RepoDb
                 statementBuilder);
             var param = (object)null;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo(null) });
@@ -775,7 +775,7 @@ namespace RepoDb
                 statementBuilder);
             var param = (object)null;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo(null) });
@@ -853,11 +853,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterCount(new TraceLog(sessionId, commandText, param, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterCount(new TraceLog(sessionId, commandText, param, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result;
@@ -928,11 +925,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterCount(new TraceLog(sessionId, commandText, param, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterCount(new TraceLog(sessionId, commandText, param, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result;

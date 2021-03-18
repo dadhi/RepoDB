@@ -18,7 +18,7 @@ namespace RepoDb
     public static partial class DbConnectionExtension
     {
         /*
-         * The supposed maximum parameters of 2100 is not workin with Microsoft.Data.SqlClient.
+         * The supposed maximum parameters of 2100 is not working with Microsoft.Data.SqlClient.
          * I reported this issue to SqlClient repository at Github.
          * Link: https://github.com/dotnet/SqlClient/issues/531
          */
@@ -346,7 +346,7 @@ namespace RepoDb
         /// <param name="statementBuilder">The statement builder object to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows that has been deleted from the table.</returns>
-        public static async Task<int> DeleteAllAsync<TEntity, TKey>(this IDbConnection connection,
+        public static Task<int> DeleteAllAsync<TEntity, TKey>(this IDbConnection connection,
             string tableName,
             IEnumerable<TKey> keys,
             string hints = null,
@@ -357,7 +357,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await DeleteAllAsyncInternal(connection: connection,
+            return DeleteAllAsyncInternal(connection: connection,
                 tableName: tableName,
                 keys: keys?.WithType<object>(),
                 hints: hints,
@@ -382,7 +382,7 @@ namespace RepoDb
         /// <param name="statementBuilder">The statement builder object to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The number of rows that has been deleted from the table.</returns>
-        public static async Task<int> DeleteAllAsync<TEntity>(this IDbConnection connection,
+        public static Task<int> DeleteAllAsync<TEntity>(this IDbConnection connection,
             string tableName,
             IEnumerable<object> keys,
             string hints = null,
@@ -393,7 +393,7 @@ namespace RepoDb
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            return await DeleteAllAsyncInternal(connection: connection,
+            return DeleteAllAsyncInternal(connection: connection,
                 tableName: tableName,
                 keys: keys,
                 hints: hints,
@@ -720,7 +720,7 @@ namespace RepoDb
                         {
                             break;
                         }
-                        var field = new QueryField(key.Name.AsQuoted(dbSetting), Operation.In, keyValues?.AsList());
+                        var field = new QueryField(key.Name.AsQuoted(dbSetting), Operation.In, keyValues.AsList());
                         deletedRows += DeleteInternal(connection: connection,
                             tableName: tableName,
                             where: new QueryGroup(field),
@@ -906,7 +906,7 @@ namespace RepoDb
                         {
                             break;
                         }
-                        var field = new QueryField(key.Name.AsQuoted(dbSetting), Operation.In, keyValues?.AsList());
+                        var field = new QueryField(key.Name.AsQuoted(dbSetting), Operation.In, keyValues.AsList());
                         deletedRows += await DeleteAsyncInternal(connection: connection,
                             tableName: tableName,
                             where: new QueryGroup(field),
@@ -995,11 +995,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterDeleteAll(new TraceLog(sessionId, commandText, null, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterDeleteAll(new TraceLog(sessionId, commandText, null, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result;
@@ -1064,11 +1061,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterDeleteAll(new TraceLog(sessionId, commandText, null, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterDeleteAll(new TraceLog(sessionId, commandText, null, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result;

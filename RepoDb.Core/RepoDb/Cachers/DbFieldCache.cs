@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the list of <see cref="DbField"/> objects of the table.
+    /// A class that is being used to cache the list of <see cref="DbField"/> objects of the table.
     /// </summary>
     public static class DbFieldCache
     {
@@ -33,7 +33,7 @@ namespace RepoDb
         {
             if (dbFields?.Any() != true)
             {
-                throw new MissingFieldsException($"There are no database fields found for table '{tableName}'. Make sure that the target table '{tableName}' is present in the database and/or atleast a single field is available.");
+                throw new MissingFieldsException($"There are no database fields found for table '{tableName}'. Make sure that the target table '{tableName}' is present in the database and/or at least a single field is available.");
             }
         }
 
@@ -86,10 +86,9 @@ namespace RepoDb
         {
             var type = connection.GetType();
             var key = (long)type.GetHashCode();
-            var result = (IEnumerable<DbField>)null;
 
             // Note: For SqlConnection, the ConnectionString is changing if the (Integrated Security=False). Actually for this isolation, the database name is enough.
-            if (!string.IsNullOrWhiteSpace(connection?.Database))
+            if (!string.IsNullOrWhiteSpace(connection.Database))
             {
                 key += connection.Database.GetHashCode();
             }
@@ -101,7 +100,7 @@ namespace RepoDb
             }
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 // Get from DB
                 var dbHelper = DbHelperMapper.Get(type);
@@ -156,7 +155,7 @@ namespace RepoDb
             GetAsyncInternal(connection, tableName, transaction, enableValidation, cancellationToken);
 
         /// <summary>
-        /// Gets the cached field definitions of the entity in an asychronous way.
+        /// Gets the cached field definitions of the entity in an asynchronous way.
         /// </summary>
         /// <typeparam name="TDbConnection">The type of <see cref="IDbConnection"/> object.</typeparam>
         /// <param name="connection">The instance of the <see cref="IDbConnection"/> object.</param>
@@ -174,10 +173,9 @@ namespace RepoDb
         {
             var type = connection.GetType();
             var key = (long)type.GetHashCode();
-            var result = (IEnumerable<DbField>)null;
 
             // Note: For SqlConnection, the ConnectionString is changing if the (Integrated Security=False). Actually for this isolation, the database name is enough.
-            if (!string.IsNullOrWhiteSpace(connection?.Database))
+            if (!string.IsNullOrWhiteSpace(connection.Database))
             {
                 key += connection.Database.GetHashCode();
             }
@@ -189,7 +187,7 @@ namespace RepoDb
             }
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 // Get from DB
                 var dbHelper = DbHelperMapper.Get(type);

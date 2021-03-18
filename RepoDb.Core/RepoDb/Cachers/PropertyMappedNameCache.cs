@@ -9,14 +9,14 @@ using System.Reflection;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the mapped-name of the property.
+    /// A class that is being used to cache the mapped-name of the property.
     /// </summary>
     public static class PropertyMappedNameCache
     {
         #region Privates
 
         private static readonly ConcurrentDictionary<int, string> cache = new ConcurrentDictionary<int, string>();
-        private static IResolver<PropertyInfo, string> resolver = new PropertyMappedNameResolver();
+        private static IResolver<PropertyInfo, Type, string> resolver = new PropertyMappedNameResolver();
 
         #endregion
 
@@ -85,12 +85,11 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var result = (string)null;
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
-                result = resolver.Resolve(propertyInfo);
+                result = resolver.Resolve(propertyInfo, entityType);
                 cache.TryAdd(key, result);
             }
 

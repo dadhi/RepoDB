@@ -23,7 +23,7 @@ namespace RepoDb
         #region SubClasses
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         internal class CommandArrayParametersText
         {
@@ -148,7 +148,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -199,19 +199,25 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
+                var result = (IEnumerable<dynamic>)null;
+
+                // Execute
                 using (var reader = command.ExecuteReader())
                 {
-                    var result = DataReader.ToEnumerable(reader, dbFields, connection.GetDbSetting()).AsList();
+                    result = DataReader.ToEnumerable(reader, dbFields, connection.GetDbSetting()).AsList();
 
                     // Set Cache
                     if (cacheKey != null)
                     {
                         cache?.Add(cacheKey, (IEnumerable<dynamic>)result, cacheItemExpiration.GetValueOrDefault(), false);
                     }
-
-                    // Return
-                    return result;
                 }
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -268,7 +274,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -322,19 +328,25 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
+                var result = (IEnumerable<dynamic>)null;
+
+                // Execute
                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                 {
-                    var result = await DataReader.ToEnumerableAsync(reader, dbFields, connection.GetDbSetting());
+                    result = (await DataReader.ToEnumerableAsync(reader, dbFields, connection.GetDbSetting(), cancellationToken)).AsList();
 
                     // Set Cache
                     if (cacheKey != null)
                     {
                         cache?.Add(cacheKey, (IEnumerable<dynamic>)result, cacheItemExpiration.GetValueOrDefault(), false);
                     }
-
-                    // Return
-                    return result;
                 }
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -389,7 +401,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -461,7 +473,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -517,12 +529,15 @@ namespace RepoDb
                 cache?.Add(cacheKey, result, cacheItemExpiration.GetValueOrDefault(), false);
             }
 
+            // Set the output parameters
+            SetOutputParameters(param);
+
             // Return
             return result;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -574,19 +589,25 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
+                var result = (IEnumerable<TResult>)null;
+
+                // Execute
                 using (var reader = command.ExecuteReader())
                 {
-                    var result = DataReader.ToEnumerable<TResult>(reader, dbFields, connection.GetDbSetting()).AsList();
+                    result = DataReader.ToEnumerable<TResult>(reader, dbFields, connection.GetDbSetting()).AsList();
 
                     // Set Cache
                     if (cacheKey != null)
                     {
                         cache?.Add(cacheKey, (IEnumerable<TResult>)result, cacheItemExpiration.GetValueOrDefault(), false);
                     }
-
-                    // Return
-                    return result;
                 }
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -644,7 +665,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -720,7 +741,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -779,12 +800,15 @@ namespace RepoDb
                 cache?.Add(cacheKey, result, cacheItemExpiration.GetValueOrDefault(), false);
             }
 
+            // Set the output parameters
+            SetOutputParameters(param);
+
             // Return
             return result;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -839,20 +863,26 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
+                var result = (IEnumerable<TResult>)null;
+
+                // Execute
                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                 {
-                    var result = await DataReader.ToEnumerableAsync<TResult>(reader, dbFields,
-                        connection.GetDbSetting());
+                    result = (await DataReader.ToEnumerableAsync<TResult>(reader, dbFields,
+                        connection.GetDbSetting(), cancellationToken)).AsList();
 
                     // Set Cache
                     if (cacheKey != null)
                     {
                         cache?.Add(cacheKey, (IEnumerable<TResult>)result, cacheItemExpiration.GetValueOrDefault(), false);
                     }
-
-                    // Return
-                    return result;
                 }
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -888,7 +918,7 @@ namespace RepoDb
                 false);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -918,7 +948,7 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: false);
 
             // Return
-            return new QueryMultipleExtractor((DbConnection)connection, (DbDataReader)reader, isDisposeConnection);
+            return new QueryMultipleExtractor((DbConnection)connection, (DbDataReader)reader, isDisposeConnection, param);
         }
 
         #endregion
@@ -956,7 +986,7 @@ namespace RepoDb
                 cancellationToken);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -990,7 +1020,7 @@ namespace RepoDb
 
             // Return
             return new QueryMultipleExtractor((DbConnection)connection, (DbDataReader)reader,
-                isDisposeConnection, cancellationToken);
+                isDisposeConnection, param, cancellationToken);
         }
 
         #endregion
@@ -1030,7 +1060,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -1068,7 +1098,13 @@ namespace RepoDb
             // Ensure the DbCommand disposal
             try
             {
-                return command.ExecuteReader();
+                var reader = command.ExecuteReader();
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return reader;
             }
             catch
             {
@@ -1124,7 +1160,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -1165,7 +1201,13 @@ namespace RepoDb
             // Ensure the DbCommand disposal
             try
             {
-                return await command.ExecuteReaderAsync(cancellationToken);
+                var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return reader;
             }
             catch
             {
@@ -1218,7 +1260,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -1250,7 +1292,13 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
-                return command.ExecuteNonQuery();
+                var result = command.ExecuteNonQuery();
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -1294,7 +1342,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -1329,7 +1377,13 @@ namespace RepoDb
                 dbFields: dbFields,
                 skipCommandArrayParametersCheck: skipCommandArrayParametersCheck))
             {
-                return await command.ExecuteNonQueryAsync(cancellationToken);
+                var result = await command.ExecuteNonQueryAsync(cancellationToken);
+
+                // Set the output parameters
+                SetOutputParameters(param);
+
+                // Return
+                return result;
             }
         }
 
@@ -1339,7 +1393,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="commandText">The command text to be used.</param>
@@ -1356,7 +1410,7 @@ namespace RepoDb
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cache">The cache object to be used.</param>
-        /// <returns>An object that holds the first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>An object that holds the first occurrence value (first column of first row) of the execution.</returns>
         public static object ExecuteScalar(this IDbConnection connection,
             string commandText,
             object param = null,
@@ -1387,7 +1441,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database in an asynchronous way. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="commandText">The command text to be used.</param>
@@ -1405,7 +1459,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cache">The cache object to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
-        /// <returns>An object that holds the first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>An object that holds the first occurrence value (first column of first row) of the execution.</returns>
         public static Task<object> ExecuteScalarAsync(this IDbConnection connection,
             string commandText,
             object param = null,
@@ -1438,7 +1492,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <typeparam name="TResult">The target return type.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
@@ -1456,7 +1510,7 @@ namespace RepoDb
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cache">The cache object to be used.</param>
-        /// <returns>A first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>A first occurrence value (first column of first row) of the execution.</returns>
         public static TResult ExecuteScalar<TResult>(this IDbConnection connection,
             string commandText,
             object param = null,
@@ -1482,7 +1536,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -1539,6 +1593,9 @@ namespace RepoDb
                     cache?.Add(cacheKey, result, cacheItemExpiration.GetValueOrDefault(), false);
                 }
 
+                // Set the output parameters
+                SetOutputParameters(param);
+
                 // Return
                 return result;
             }
@@ -1550,7 +1607,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database in an asynchronous way. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <typeparam name="TResult">The target return type.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
@@ -1569,7 +1626,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cache">The cache object to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
-        /// <returns>A first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>A first occurrence value (first column of first row) of the execution.</returns>
         public static Task<TResult> ExecuteScalarAsync<TResult>(this IDbConnection connection,
             string commandText,
             object param = null,
@@ -1597,7 +1654,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="connection"></param>
@@ -1656,6 +1713,9 @@ namespace RepoDb
                 {
                     cache?.Add(cacheKey, result, cacheItemExpiration.GetValueOrDefault(), false);
                 }
+
+                // Set the output parameters
+                SetOutputParameters(param);
 
                 // Return
                 return result;
@@ -1748,10 +1808,97 @@ namespace RepoDb
 
         #region Helper Methods
 
+        #region DbParameters
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="param"></param>
+        internal static void SetOutputParameters(object param)
+        {
+            if (param is QueryGroup group)
+            {
+                SetOutputParameters(group);
+            }
+            else if (param is IEnumerable<QueryField> fields)
+            {
+                SetOutputParameters(fields);
+            }
+            else if (param is QueryField field)
+            {
+                SetOutputParameter(field);
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="queryGroup"></param>
+        internal static void SetOutputParameters(QueryGroup queryGroup) =>
+            SetOutputParameters(queryGroup.GetFields(true));
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="queryFields"></param>
+        internal static void SetOutputParameters(IEnumerable<QueryField> queryFields)
+        {
+            if (queryFields?.Any() != true)
+            {
+                return;
+            }
+            foreach (var queryField in queryFields.Where(e => e.DbParameter?.Direction != ParameterDirection.Input))
+            {
+                SetOutputParameter(queryField);
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="queryField"></param>
+        internal static void SetOutputParameter(QueryField queryField)
+        {
+            if (queryField == null)
+            {
+                return;
+            }
+            queryField.Parameter.SetValue(queryField.GetValue());
+        }
+
+        #endregion
+
+        #region Order Columns
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="command"></param>
+        /// <param name="entities"></param>
+        private static void AddOrderColumnParameters<TEntity>(DbCommand command,
+            IEnumerable<TEntity> entities)
+            where TEntity : class
+        {
+            var index = 0;
+            foreach (var item in entities)
+            {
+                var parameter = command.CreateParameter($"__RepoDb_OrderColumn_{index}", index, DbType.Int32);
+                parameter.Direction = ParameterDirection.Input;
+                parameter.Size = 4;
+                parameter.Precision = 10;
+                parameter.Scale = 0;
+                command.Parameters.Add(parameter);
+                index++;
+            }
+        }
+
+        #endregion
+
         #region GetAndGuardPrimaryKeyOrIdentityKey
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -1763,7 +1910,7 @@ namespace RepoDb
             GetAndGuardPrimaryKeyOrIdentityKey<TEntity>(connection, ClassMappedNameCache.Get<TEntity>(), transaction);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -1777,7 +1924,7 @@ namespace RepoDb
             GetAndGuardPrimaryKeyOrIdentityKey(connection, tableName, transaction, typeof(TEntity));
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
@@ -1799,7 +1946,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -1813,7 +1960,7 @@ namespace RepoDb
             GetAndGuardPrimaryKeyOrIdentityKeyAsync<TEntity>(connection, ClassMappedNameCache.Get<TEntity>(), transaction, cancellationToken);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -1829,7 +1976,7 @@ namespace RepoDb
             GetAndGuardPrimaryKeyOrIdentityKeyAsync(connection, tableName, transaction, typeof(TEntity), cancellationToken);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
@@ -1853,7 +2000,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="field"></param>
@@ -1869,7 +2016,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="entityType"></param>
         /// <param name="dbFields"></param>
@@ -1904,7 +2051,7 @@ namespace RepoDb
             else
             {
                 // Properties
-                var properties = PropertyCache.Get(entityType) ?? entityType?.GetClassProperties();
+                var properties = PropertyCache.Get(entityType) ?? entityType.GetClassProperties();
                 var property = (ClassProperty)null;
 
                 // Primary
@@ -1940,7 +2087,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
@@ -1956,7 +2103,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="tableName"></param>
@@ -1974,7 +2121,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="dbField"></param>
@@ -1994,7 +2141,7 @@ namespace RepoDb
         #region WhatToQueryGroup
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
@@ -2014,7 +2161,7 @@ namespace RepoDb
             var queryGroup = WhatToQueryGroup<T>(what);
             if (queryGroup == null)
             {
-                var whatType = what?.GetType();
+                var whatType = what.GetType();
                 if (whatType.IsClassType() || whatType.IsAnonymousType())
                 {
                     var field = GetAndGuardPrimaryKeyOrIdentityKey(connection, tableName, transaction, whatType);
@@ -2030,7 +2177,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
@@ -2052,7 +2199,7 @@ namespace RepoDb
             var queryGroup = WhatToQueryGroup<T>(what);
             if (queryGroup == null)
             {
-                var whatType = what?.GetType();
+                var whatType = what.GetType();
                 if (whatType.IsClassType() || whatType.IsAnonymousType())
                 {
                     var field = await GetAndGuardPrimaryKeyOrIdentityKeyAsync(connection, tableName, transaction, whatType, cancellationToken);
@@ -2068,7 +2215,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="tableName"></param>
@@ -2091,7 +2238,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -2117,7 +2264,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="connection"></param>
@@ -2145,7 +2292,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dbField"></param>
@@ -2173,7 +2320,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="field"></param>
@@ -2199,7 +2346,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="what"></param>
@@ -2210,17 +2357,17 @@ namespace RepoDb
             {
                 return null;
             }
-            else if (what is QueryField)
+            else if (what is QueryField field)
             {
-                return ToQueryGroup(what as QueryField);
+                return ToQueryGroup(field);
             }
-            else if (what is IEnumerable<QueryField>)
+            else if (what is IEnumerable<QueryField> fields)
             {
-                return ToQueryGroup(what as IEnumerable<QueryField>);
+                return ToQueryGroup(fields);
             }
-            else if (what is QueryGroup)
+            else if (what is QueryGroup group)
             {
-                return what as QueryGroup;
+                return group;
             }
             else
             {
@@ -2238,7 +2385,7 @@ namespace RepoDb
         #region ToQueryGroup
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -2260,7 +2407,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="dbField"></param>
         /// <param name="entity"></param>
@@ -2274,7 +2421,7 @@ namespace RepoDb
             }
             if (dbField != null)
             {
-                var type = entity?.GetType();
+                var type = entity.GetType();
                 if (type.IsClassType())
                 {
                     var properties = PropertyCache.Get(type) ?? type.GetClassProperties();
@@ -2294,7 +2441,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="where"></param>
@@ -2310,7 +2457,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="field"></param>
         /// <param name="dictionary"></param>
@@ -2326,7 +2473,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="field"></param>
@@ -2342,7 +2489,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="property"></param>
@@ -2354,7 +2501,7 @@ namespace RepoDb
             ToQueryGroup(property.PropertyInfo.AsQueryField(entity));
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="queryField"></param>
         /// <returns></returns>
@@ -2368,7 +2515,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="queryFields"></param>
         /// <returns></returns>
@@ -2384,7 +2531,7 @@ namespace RepoDb
         #endregion
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="entityType"></param>
         /// <returns></returns>
@@ -2392,7 +2539,7 @@ namespace RepoDb
             entityType != null ? (PrimaryCache.Get(entityType) ?? IdentityCache.Get(entityType))?.AsField() : null;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entities"></param>
@@ -2410,7 +2557,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="transaction"></param>
@@ -2424,7 +2571,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="command"></param>
         /// <param name="where"></param>
@@ -2437,7 +2584,7 @@ namespace RepoDb
             DbCommandExtension.CreateParameters(command, where, null, entityType, dbFields);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="properties"></param>
@@ -2462,7 +2609,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="dictionary"></param>
         /// <param name="qualifiers"></param>
@@ -2485,7 +2632,7 @@ namespace RepoDb
                 }
             }
 
-            if (queryFields?.Any() != true)
+            if (queryFields.Any() != true)
             {
                 throw new MissingFieldsException("No qualifier fields defined for the 'Upsert' operation. Please check the items defined at the dictionary object.");
             }
@@ -2494,7 +2641,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <typeparam name="TResult"></typeparam>
@@ -2507,7 +2654,7 @@ namespace RepoDb
             ClassExpression.GetEntitiesPropertyValues<TEntity, TResult>(entities, property);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entity"></param>
@@ -2520,7 +2667,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="fields"></param>
@@ -2530,7 +2677,7 @@ namespace RepoDb
             fields ?? (typeof(TEntity).IsDictionaryStringObject() == false ? FieldCache.Get<TEntity>() : null);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="fields"></param>
@@ -2542,7 +2689,7 @@ namespace RepoDb
             fields ?? GetQualifiedFields(entity);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="parameterName"></param>
@@ -2567,7 +2714,7 @@ namespace RepoDb
             }
 
             // Get the variables needed
-            var parameters = values.Select((value, index) =>
+            var parameters = values.Select((_, index) =>
                 string.Concat(parameterName, index).AsParameter(dbSetting));
 
             // Replace the target parameter
@@ -2577,7 +2724,7 @@ namespace RepoDb
         #region CreateDbCommandForExecution
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -2618,7 +2765,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -2661,7 +2808,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="commandText"></param>
@@ -2690,7 +2837,7 @@ namespace RepoDb
             // Func
             if (param != null)
             {
-                var func = FunctionCache.GetPlainTypeToDbParametersCompiledFunction(param?.GetType(), dbFields);
+                var func = FunctionCache.GetPlainTypeToDbParametersCompiledFunction(param.GetType(), entityType, dbFields);
                 if (func != null)
                 {
                     var cmd = (DbCommand)command;
@@ -2736,7 +2883,7 @@ namespace RepoDb
         #region GetCommandArrayParameters
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="param"></param>
@@ -2754,28 +2901,28 @@ namespace RepoDb
             // ExpandoObject
             if (param is ExpandoObject || param is System.Collections.IDictionary)
             {
-                if (param is IDictionary<string, object>)
+                if (param is IDictionary<string, object> objects)
                 {
-                    return GetCommandArrayParametersText(commandText, (IDictionary<string, object>)param, dbSetting);
+                    return GetCommandArrayParametersText(commandText, objects, dbSetting);
                 }
             }
 
             // QueryField
-            else if (param is QueryField)
+            else if (param is QueryField field)
             {
-                return GetCommandArrayParametersText(commandText, (QueryField)param, dbSetting);
+                return GetCommandArrayParametersText(commandText, field, dbSetting);
             }
 
             // QueryFields
-            else if (param is IEnumerable<QueryField>)
+            else if (param is IEnumerable<QueryField> fields)
             {
-                return GetCommandArrayParametersText(commandText, (IEnumerable<QueryField>)param, dbSetting);
+                return GetCommandArrayParametersText(commandText, fields, dbSetting);
             }
 
             // QueryGroup
-            else if (param is QueryGroup)
+            else if (param is QueryGroup group)
             {
-                return GetCommandArrayParametersText(commandText, (QueryGroup)param, dbSetting);
+                return GetCommandArrayParametersText(commandText, group, dbSetting);
             }
 
             // Others
@@ -2789,7 +2936,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="param"></param>
@@ -2810,7 +2957,9 @@ namespace RepoDb
             // CommandArrayParameters
             foreach (var property in param.GetType().GetProperties())
             {
-                if (property.PropertyType == StaticType.String ||
+                var propertyHandler = PropertyHandlerCache.Get<object>(property.DeclaringType, property);
+                if (propertyHandler != null ||
+                    property.PropertyType == StaticType.String ||
                     StaticType.IEnumerable.IsAssignableFrom(property.PropertyType) == false)
                 {
                     continue;
@@ -2854,7 +3003,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="dictionary"></param>
@@ -2913,7 +3062,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="queryField"></param>
@@ -2960,7 +3109,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="queryFields"></param>
@@ -3025,7 +3174,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="queryGroup"></param>
@@ -3037,7 +3186,7 @@ namespace RepoDb
             GetCommandArrayParametersText(commandText, queryGroup.GetFields(true), dbSetting);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="parameterName"></param>
         /// <param name="value"></param>
@@ -3045,7 +3194,9 @@ namespace RepoDb
         private static CommandArrayParameter GetCommandArrayParameter(string parameterName,
             object value)
         {
-            if (value == null || value is string || value is System.Collections.IEnumerable == false)
+            var valueType = value?.GetType();
+            var propertyHandler = valueType != null ? PropertyHandlerCache.Get<object>(valueType) : null;
+            if (value == null || propertyHandler != null || value is string || value is System.Collections.IEnumerable == false)
             {
                 return null;
             }
@@ -3058,7 +3209,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="parameterName"></param>
@@ -3076,14 +3227,15 @@ namespace RepoDb
             }
 
             // Items
-            var items = values is IEnumerable<object> ? (IEnumerable<object>)values : values.WithType<object>();
+            var items = values is IEnumerable<object> objects ? objects : values.WithType<object>();
             if (items.Any() != true)
             {
-                return commandText;
+                var parameter = parameterName.AsParameter(dbSetting);
+                return commandText.Replace(parameter, string.Concat("(SELECT ", parameter, " WHERE 1 = 0)"));
             }
 
             // Get the variables needed
-            var parameters = items.Select((value, index) =>
+            var parameters = items.Select((_, index) =>
                 string.Concat(parameterName, index).AsParameter(dbSetting));
 
             // Replace the target parameter
@@ -3091,7 +3243,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="commandText"></param>
         /// <param name="queryField"></param>

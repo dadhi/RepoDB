@@ -9,7 +9,7 @@ using RepoDb.Extensions;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map a .NET CLR type or class property into its equivalent <see cref="DbType"/> object.
+    /// A class that is being used to map a .NET CLR type or class property into its equivalent <see cref="DbType"/> object.
     /// </summary>
     public static class TypeMapper
     {
@@ -67,10 +67,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(type);
-            var value = (DbType?)null;
 
             // Try get the cache
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -113,11 +112,10 @@ namespace RepoDb
             ThrowNullReferenceException(type, "Type");
 
             // Variables
-            var value = (DbType?)null;
             var key = GenerateHashCode(type);
 
             // Try get the value
-            maps.TryGetValue(key, out value);
+            maps.TryGetValue(key, out var value);
 
             // Return the value
             return value;
@@ -295,10 +293,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var value = (DbType?)null;
 
             // Try get the cache
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -366,10 +363,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var value = (DbType?)null;
 
             // Try get the value
-            maps.TryGetValue(key, out value);
+            maps.TryGetValue(key, out var value);
 
             // Return the value
             return value;

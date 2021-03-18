@@ -44,8 +44,8 @@ namespace RepoDb.StatementBuilders
         public override string CreateBatchQuery(QueryBuilder queryBuilder,
             string tableName,
             IEnumerable<Field> fields,
-            int? page,
-            int? rowsPerBatch,
+            int page,
+            int rowsPerBatch,
             IEnumerable<OrderField> orderBy = null,
             QueryGroup where = null,
             string hints = null)
@@ -63,21 +63,21 @@ namespace RepoDb.StatementBuilders
             }
 
             // Validate order by
-            if (orderBy == null || orderBy?.Any() != true)
+            if (orderBy == null || orderBy.Any() != true)
             {
                 throw new EmptyException("The argument 'orderBy' is required.");
             }
 
             // Validate the page
-            if (page == null || page < 0)
+            if (page < 0)
             {
-                throw new ArgumentOutOfRangeException("The page must be equals or greater than 0.");
+                throw new ArgumentOutOfRangeException(nameof(page), "The page must be equals or greater than 0.");
             }
 
             // Validate the page
-            if (rowsPerBatch == null || rowsPerBatch < 1)
+            if (rowsPerBatch < 1)
             {
-                throw new ArgumentOutOfRangeException($"The rows per batch must be equals or greater than 1.");
+                throw new ArgumentOutOfRangeException(nameof(rowsPerBatch), "The rows per batch must be equals or greater than 1.");
             }
 
             // Skipping variables
@@ -98,7 +98,7 @@ namespace RepoDb.StatementBuilders
                 .End();
 
             // Return the query
-            return queryBuilder.GetString();
+            return builder.GetString();
         }
 
         #endregion
@@ -189,7 +189,7 @@ namespace RepoDb.StatementBuilders
 
             // Set the return value
             var result = identityField != null ?
-                string.Concat($"CAST(last_insert_rowid() AS {databaseType})") :
+                $"CAST(last_insert_rowid() AS {databaseType})" :
                     primaryField != null ? primaryField.Name.AsParameter(DbSetting) : "NULL";
 
             builder
@@ -262,8 +262,8 @@ namespace RepoDb.StatementBuilders
                     var line = splitted[index].Trim();
                     var returnValue = string.IsNullOrEmpty(databaseType) ?
                         "SELECT last_insert_rowid()" :
-                        $"SELECT CAST(last_insert_rowid() AS {databaseType})";
-                    commandTexts.Add(string.Concat(line, " ; ", returnValue, " ;"));
+                        $"SELECT CAST(last_insert_rowid() AS {databaseType}) AS [Id]";
+                    commandTexts.Add(string.Concat(line, " ; ", returnValue, $", {DbSetting.ParameterPrefix}__RepoDb_OrderColumn_{index} AS [OrderColumn] ;"));
                 }
 
                 // Set the command text
@@ -310,7 +310,7 @@ namespace RepoDb.StatementBuilders
             //    throw new NullReferenceException($"The list of fields cannot be null or empty.");
             //}
 
-            //// Check the primay field
+            //// Check the primary field
             //if (primaryField == null)
             //{
             //    throw new PrimaryFieldNotFoundException($"SqLite is using the primary key as qualifier for (INSERT or REPLACE) operation.");
@@ -409,6 +409,7 @@ namespace RepoDb.StatementBuilders
             string hints = null)
         {
             throw new NotImplementedException("The merge statement is not supported in SQLite. SQLite is using the 'Upsert (Insert/Update)' operation.");
+
             //// Ensure with guards
             //GuardTableName(tableName);
             //GuardHints(hints);
@@ -421,7 +422,7 @@ namespace RepoDb.StatementBuilders
             //    throw new NullReferenceException($"The list of fields cannot be null or empty.");
             //}
 
-            //// Check the primay field
+            //// Check the primary field
             //if (primaryField == null)
             //{
             //    throw new PrimaryFieldNotFoundException($"SqLite is using the primary key as qualifier for (INSERT or REPLACE) operation.");
@@ -543,12 +544,12 @@ namespace RepoDb.StatementBuilders
             if (orderBy != null)
             {
                 // Check if the order fields are present in the given fields
-                var unmatchesOrderFields = orderBy?.Where(orderField =>
-                    fields?.FirstOrDefault(f =>
+                var unmatchesOrderFields = orderBy.Where(orderField =>
+                    fields.FirstOrDefault(f =>
                         string.Equals(orderField.Name, f.Name, StringComparison.OrdinalIgnoreCase)) == null);
 
                 // Throw an error we found any unmatches
-                if (unmatchesOrderFields?.Any() == true)
+                if (unmatchesOrderFields.Any() == true)
                 {
                     throw new MissingFieldsException($"The order fields '{unmatchesOrderFields.Select(field => field.Name).Join(", ")}' are not " +
                         $"present at the given fields '{fields.Select(field => field.Name).Join(", ")}'.");

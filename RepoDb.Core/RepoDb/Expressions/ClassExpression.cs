@@ -151,11 +151,10 @@ namespace RepoDb
                 Guard(property);
 
                 // Variables needed
-                var func = (Func<TEntity, TResult>)null;
                 var key = property.GetHashCode();
 
                 // Get from the cache
-                if (cache.TryGetValue(key, out func) == false)
+                if (cache.TryGetValue(key, out var func) == false)
                 {
                     func = GetFunc(property);
                 }
@@ -211,10 +210,7 @@ namespace RepoDb
             /// <returns></returns>
             public static IEnumerable<ClassProperty> Do()
             {
-                if (func == null)
-                {
-                    func = GetFunc();
-                }
+                func ??= GetFunc();
                 return func();
             }
         }
@@ -289,10 +285,7 @@ namespace RepoDb
             /// <returns></returns>
             public static IEnumerable<PropertyValue> Do(TEntity obj)
             {
-                if (func == null)
-                {
-                    func = GetFunc();
-                }
+                func ??= GetFunc();
                 return func(obj);
             }
         }

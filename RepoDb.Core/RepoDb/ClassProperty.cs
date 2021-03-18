@@ -28,7 +28,7 @@ namespace RepoDb
         public ClassProperty(Type parentType,
             PropertyInfo property)
         {
-            DeclaringType = parentType;
+            declaringType = parentType;
             PropertyInfo = property;
         }
 
@@ -37,7 +37,7 @@ namespace RepoDb
         /// <summary>
         /// Gets the original declaring type (avoiding the interface collision).
         /// </summary>
-        public Type DeclaringType { get; }
+        private readonly Type declaringType;
 
         /// <summary>
         /// Gets the wrapped property of this object.
@@ -62,7 +62,7 @@ namespace RepoDb
         /// </summary>
         /// <returns>The declaring type.</returns>
         public Type GetDeclaringType() =>
-            (DeclaringType ?? PropertyInfo.DeclaringType);
+            (declaringType ?? PropertyInfo.DeclaringType);
 
         /*
          * AsField
@@ -232,7 +232,7 @@ namespace RepoDb
             isDbTypeWasSet = true;
 
             // Return the value
-            return dbType = TypeMapCache.Get(GetDeclaringType(), PropertyInfo);
+            return dbType = TypeMapCache.Get(GetDeclaringType(), PropertyInfo) ?? TypeMapCache.Get(PropertyInfo.PropertyType);
         }
 
         /*
@@ -298,7 +298,7 @@ namespace RepoDb
         /// </summary>
         /// <returns>The hash code value.</returns>
         public override int GetHashCode() =>
-            GetDeclaringType().GetHashCode() ^ PropertyInfo.GenerateCustomizedHashCode();
+            GetDeclaringType().GetHashCode() ^ PropertyInfo.GenerateCustomizedHashCode(GetDeclaringType());
 
         /// <summary>
         /// Compare the current instance to the other object instance.
@@ -307,9 +307,9 @@ namespace RepoDb
         /// <returns>True if the two instance is the same.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is ClassProperty)
+            if (obj is ClassProperty property)
             {
-                return PropertyInfo.Equals(((ClassProperty)obj).PropertyInfo);
+                return PropertyInfo.Equals(property.PropertyInfo);
             }
             return Equals(obj);
         }

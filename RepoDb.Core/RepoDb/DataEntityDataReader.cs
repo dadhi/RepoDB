@@ -5,9 +5,6 @@ using System.Data.Common;
 using System.Linq;
 using System.Collections;
 using RepoDb.Extensions;
-using RepoDb.Interfaces;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace RepoDb
 {
@@ -71,6 +68,22 @@ namespace RepoDb
             IEnumerable<TEntity> entities,
             IDbConnection connection,
             IDbTransaction transaction)
+            : this(tableName, entities, connection, transaction, false)
+        { }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="DataEntityDataReader{TEntity}"/> object.
+        /// </summary>
+        /// <param name="tableName">The name of the target table.</param>
+        /// <param name="entities">The list of the data entity object to be used for manipulation.</param>
+        /// <param name="transaction">The transaction object that is currently in used.</param>
+        /// <param name="connection">The actual <see cref="IDbConnection"/> object used.</param>
+        /// <param name="hasOrderingColumn">The value that signifies whether the ordering column will be defined.</param>
+        public DataEntityDataReader(string tableName,
+            IEnumerable<TEntity> entities,
+            IDbConnection connection,
+            IDbTransaction transaction,
+            bool hasOrderingColumn)
         {
             if (entities == null)
             {
@@ -87,69 +100,19 @@ namespace RepoDb
             // Type
             var entityType = typeof(TEntity);
             EntityType = entityType == StaticType.Object ?
-                (entities?.FirstOrDefault()?.GetType() ?? entityType) :
+                (entities.FirstOrDefault()?.GetType() ?? entityType) :
                 entityType;
             isDictionaryStringObject = EntityType.IsDictionaryStringObject();
-
-            // DbSetting
-            DbSetting = connection?.GetDbSetting();
 
             // Properties
             Connection = connection;
             Transaction = transaction;
+            HasOrderingColumn = hasOrderingColumn;
             Enumerator = entities.GetEnumerator();
             Entities = entities;
-        }
-
-        /// <summary>
-        /// Initializes the current instance of <see cref="DataEntityDataReader{TEntity}"/> object.
-        /// </summary>
-        public void Initialize()
-        {
-            if (IsInitialized)
-            {
-                return;
-            }
-            var dbFields = (IEnumerable<DbField>)null;
-            if (Connection != null)
-            {
-                dbFields = DbFieldCache.Get(Connection, TableName, Transaction, false);
-            }
-            InitializeInternal(dbFields);
-        }
-
-        /// <summary>
-        /// Initializes the current instance of <see cref="DataEntityDataReader{TEntity}"/> object.
-        /// </summary>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
-        public async Task InitializeAsync(CancellationToken cancellationToken = default)
-        {
-            if (IsInitialized)
-            {
-                return;
-            }
-            var dbFields = (IEnumerable<DbField>)null;
-            if (Connection != null)
-            {
-                dbFields = await DbFieldCache.GetAsync(Connection, TableName, Transaction, false, cancellationToken);
-            }
-            InitializeInternal(dbFields);
-        }
-
-        /// <summary>
-        /// Initializes the current instance of <see cref="DataEntityDataReader{TEntity}"/> object.
-        /// </summary>
-        /// <param name="dbFields">The list of the <see cref="DbField"/> objects.</param>
-        private void InitializeInternal(IEnumerable<DbField> dbFields)
-        {
-            if (IsInitialized)
-            {
-                return;
-            }
-            Properties = GetClassProperties(dbFields).AsList();
-            Fields = GetFields(Entities?.FirstOrDefault() as IDictionary<string, object>, dbFields).AsList();
+            Properties = GetClassProperties().AsList();
+            Fields = GetFields(Entities?.FirstOrDefault() as IDictionary<string, object>).AsList();
             fieldCount = isDictionaryStringObject ? Fields.Count : Properties.Count;
-            IsInitialized = true;
         }
 
         /// <summary>
@@ -175,11 +138,6 @@ namespace RepoDb
         public bool IsInitialized { get; private set; }
 
         /// <summary>
-        /// Returns the database setting that is currently in used.
-        /// </summary>
-        private IDbSetting DbSetting { get; }
-
-        /// <summary>
         /// Gets the instance of enumerator that iterates through a collection of data entity objects.
         /// </summary>
         public IEnumerator<TEntity> Enumerator { get; private set; }
@@ -201,12 +159,6 @@ namespace RepoDb
         private Type EntityType { get; set; }
 
         /// <summary>
-        /// Gets the name of the target table.
-        /// </summary>
-        private string TableName =>
-            tableName;
-
-        /// <summary>
         /// Gets the properties of data entity object.
         /// </summary>
         private IList<ClassProperty> Properties { get; set; }
@@ -215,6 +167,11 @@ namespace RepoDb
         /// Gets the fields of the dictionary.
         /// </summary>
         private IList<Field> Fields { get; set; }
+
+        /// <summary>
+        /// Gets a value that indicates whether the ordering column is defined.
+        /// </summary>
+        private bool HasOrderingColumn { get; }
 
         /// <summary>
         /// Gets the current value from the index.
@@ -291,7 +248,7 @@ namespace RepoDb
         /// </summary>
         public void Reset()
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             Enumerator = Entities.GetEnumerator();
             position = -1;
             recordsAffected = -1;
@@ -304,7 +261,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override bool GetBoolean(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<bool>(GetValue(i));
         }
 
@@ -315,7 +272,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override byte GetByte(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<byte>(GetValue(i));
         }
 
@@ -330,7 +287,7 @@ namespace RepoDb
         /// <returns></returns>
         public override long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             throw new NotSupportedException("This is not supported by this data reader.");
         }
 
@@ -341,7 +298,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override char GetChar(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<char>(GetValue(i));
         }
 
@@ -356,7 +313,7 @@ namespace RepoDb
         /// <returns></returns>
         public override long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             throw new NotSupportedException("This is not supported by this data reader.");
         }
 
@@ -367,7 +324,7 @@ namespace RepoDb
         /// <returns>Int</returns>
         public new IDataReader GetData(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             throw new NotSupportedException("This is not supported by this data reader.");
         }
 
@@ -378,7 +335,7 @@ namespace RepoDb
         /// <returns>The property type name from the property index.</returns>
         public override string GetDataTypeName(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Properties[i].PropertyInfo.PropertyType.Name;
         }
 
@@ -389,7 +346,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override DateTime GetDateTime(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<DateTime>(GetValue(i));
         }
 
@@ -400,7 +357,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override decimal GetDecimal(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<decimal>(GetValue(i));
         }
 
@@ -411,7 +368,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override double GetDouble(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<double>(GetValue(i));
         }
 
@@ -422,7 +379,7 @@ namespace RepoDb
         /// <returns>The property type from the property index.</returns>
         public override Type GetFieldType(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Properties[i].PropertyInfo.PropertyType;
         }
 
@@ -433,7 +390,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override float GetFloat(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<float>(GetValue(i));
         }
 
@@ -444,7 +401,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override Guid GetGuid(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Guid.Parse(GetValue(i)?.ToString());
         }
 
@@ -455,7 +412,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override short GetInt16(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<short>(GetValue(i));
         }
 
@@ -466,7 +423,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override int GetInt32(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<int>(GetValue(i));
         }
 
@@ -477,7 +434,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override long GetInt64(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<long>(GetValue(i));
         }
 
@@ -486,17 +443,37 @@ namespace RepoDb
         /// </summary>
         /// <param name="i">The index of the property.</param>
         /// <returns>The name from the property index.</returns>
-        public override string GetName(int i)
+        public override string GetName(int i) =>
+            isDictionaryStringObject ? GetNameForDictionaryStringObject(i) : GetNameForEntities(i);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        private string GetNameForEntities(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
-            if (isDictionaryStringObject)
+            ThrowExceptionIfNotAvailable();
+            if (i == Properties.Count)
             {
-                return Fields[i].Name;
+                return "__RepoDb_OrderColumn";
             }
-            else
+            return Properties[i].GetMappedName();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        private string GetNameForDictionaryStringObject(int i)
+        {
+            ThrowExceptionIfNotAvailable();
+            if (i == Fields.Count)
             {
-                return Properties[i].GetMappedName();
+                return "__RepoDb_OrderColumn";
             }
+            return Fields[i].Name;
         }
 
         /// <summary>
@@ -504,18 +481,45 @@ namespace RepoDb
         /// </summary>
         /// <param name="name">The index of the property.</param>
         /// <returns>The index of the property from property name.</returns>
-        public override int GetOrdinal(string name)
+        public override int GetOrdinal(string name) =>
+            isDictionaryStringObject ? GetOrdinalForDictionaryStringObject(name) : GetOrdinalForEntities(name);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private int GetOrdinalForEntities(string name)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
-            if (isDictionaryStringObject)
+            ThrowExceptionIfNotAvailable();
+            if (HasOrderingColumn && string.Equals(name, "__RepoDb_OrderColumn", StringComparison.OrdinalIgnoreCase))
             {
-                return Fields.IndexOf(Fields.FirstOrDefault(f =>
-                    string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)));
+                return Properties.Count;
             }
             else
             {
-                return Properties.IndexOf(Properties.FirstOrDefault(p =>
-                    string.Equals(p.GetMappedName(), name, StringComparison.OrdinalIgnoreCase)));
+                var property = Properties.FirstOrDefault(p => string.Equals(p.GetMappedName(), name, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(p.PropertyInfo.Name, name, StringComparison.OrdinalIgnoreCase));
+                return Properties.IndexOf(property);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private int GetOrdinalForDictionaryStringObject(string name)
+        {
+            ThrowExceptionIfNotAvailable();
+            if (HasOrderingColumn && string.Equals(name, "__RepoDb_OrderColumn", StringComparison.OrdinalIgnoreCase))
+            {
+                return Fields.Count;
+            }
+            else
+            {
+                return Fields.IndexOf(Fields.FirstOrDefault(f =>
+                    string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)));
             }
         }
 
@@ -525,7 +529,7 @@ namespace RepoDb
         /// <returns>An instance of the <see cref="DataTable"/> with the table schema.</returns>
         public override DataTable GetSchemaTable()
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             throw new NotSupportedException("This is not supported by this data reader.");
         }
 
@@ -536,7 +540,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override string GetString(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return Converter.ToType<string>(GetValue(i));
         }
 
@@ -545,17 +549,43 @@ namespace RepoDb
         /// </summary>
         /// <param name="i">The index of the property.</param>
         /// <returns>The value from the property index.</returns>
-        public override object GetValue(int i)
+        public override object GetValue(int i) =>
+            isDictionaryStringObject ? GetValueForDictionaryStringObject(i) : GetValueForEntities(i);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public object GetValueForEntities(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
-            if (isDictionaryStringObject)
+            ThrowExceptionIfNotAvailable();
+            if (i == Properties.Count)
             {
-                var dictionary = Enumerator.Current as IDictionary<string, object>;
-                return dictionary?[Fields[i].Name];
+                return position;
             }
             else
             {
                 return Properties[i].PropertyInfo.GetValue(Enumerator.Current);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public object GetValueForDictionaryStringObject(int i)
+        {
+            ThrowExceptionIfNotAvailable();
+            if (i == Fields.Count)
+            {
+                return position;
+            }
+            else
+            {
+                var dictionary = Enumerator.Current as IDictionary<string, object>;
+                return dictionary?[Fields[i].Name];
             }
         }
 
@@ -566,7 +596,7 @@ namespace RepoDb
         /// <returns></returns>
         public override int GetValues(object[] values)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             if (values == null)
             {
                 throw new NullReferenceException("The values array must not be null.");
@@ -590,7 +620,7 @@ namespace RepoDb
         /// <returns>The value from the property index.</returns>
         public override bool IsDBNull(int i)
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             return GetValue(i) == DBNull.Value;
         }
 
@@ -600,7 +630,7 @@ namespace RepoDb
         /// <returns>Returns true if the forward operation is successful.</returns>
         public override bool NextResult()
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             throw new NotSupportedException("This is not supported by this data reader.");
         }
 
@@ -610,7 +640,7 @@ namespace RepoDb
         /// <returns>A value that indicates whether the movement is successful.</returns>
         public override bool Read()
         {
-            ThrowExceptionIfNotInitializedOrNotAvailable();
+            ThrowExceptionIfNotAvailable();
             position++;
             recordsAffected++;
             return Enumerator.MoveNext();
@@ -619,12 +649,8 @@ namespace RepoDb
         /// <summary>
         /// 
         /// </summary>
-        private void ThrowExceptionIfNotInitializedOrNotAvailable()
+        private void ThrowExceptionIfNotAvailable()
         {
-            if (!IsInitialized)
-            {
-                throw new InvalidOperationException("The reader is not yet initialized.");
-            }
             if (IsDisposed)
             {
                 throw new InvalidOperationException("The reader is already disposed.");
@@ -638,53 +664,28 @@ namespace RepoDb
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="dbFields"></param>
         /// <returns></returns>
-        private IEnumerable<ClassProperty> GetClassProperties(IEnumerable<DbField> dbFields)
+        private IEnumerable<ClassProperty> GetClassProperties()
         {
             if (isDictionaryStringObject)
             {
                 return Enumerable.Empty<ClassProperty>();
             }
-            if (dbFields?.Any() == true)
-            {
-                return PropertyCache.Get(EntityType)?
-                    .Where(p => dbFields.FirstOrDefault(f => string.Equals(f.Name.AsQuoted(DbSetting), p.GetMappedName().AsQuoted(DbSetting), StringComparison.OrdinalIgnoreCase)) != null)
-                    .AsList();
-            }
-            else
-            {
-                return PropertyCache.Get(EntityType)?.AsList();
-            }
+            return PropertyCache.Get(EntityType)?.AsList();
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="dictionary"></param>
-        /// <param name="dbFields"></param>
         /// <returns></returns>
-        private IEnumerable<Field> GetFields(IDictionary<string, object> dictionary,
-            IEnumerable<DbField> dbFields)
+        private IEnumerable<Field> GetFields(IDictionary<string, object> dictionary)
         {
             if (dictionary != null)
             {
-                if (dbFields?.Any() == true)
+                foreach (var kvp in dictionary)
                 {
-                    foreach (var kvp in dictionary)
-                    {
-                        if (dbFields.Any(e => string.Equals(e.Name.AsUnquoted(DbSetting), kvp.Key.AsUnquoted(DbSetting), StringComparison.OrdinalIgnoreCase)))
-                        {
-                            yield return new Field(kvp.Key, kvp.Value?.GetType());
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (var kvp in dictionary)
-                    {
-                        yield return new Field(kvp.Key, kvp.Value?.GetType());
-                    }
+                    yield return new Field(kvp.Key, kvp.Value?.GetType());
                 }
             }
         }

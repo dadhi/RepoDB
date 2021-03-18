@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 namespace RepoDb.Contexts.Cachers
 {
     /// <summary>
-    /// A class that is used to cache the execution context of the Update operation.
+    /// A class that is being used to cache the execution context of the Update operation.
     /// </summary>
     public static class UpdateExecutionContextCache
     {
@@ -36,8 +36,7 @@ namespace RepoDb.Contexts.Cachers
         internal static UpdateExecutionContext<TEntity> Get<TEntity>(string key)
             where TEntity : class
         {
-            var result = (object)null;
-            if (cache.TryGetValue(key, out result))
+            if (cache.TryGetValue(key, out var result))
             {
                 return result as UpdateExecutionContext<TEntity>;
             }

@@ -33,21 +33,31 @@ namespace RepoDb.Extensions
         public static Attribute GetCustomAttribute(this PropertyInfo property,
             Type type)
         {
-            var attributes = property.GetCustomAttributes(type, false)?.WithType<Attribute>();
+            var attributes = property.GetCustomAttributes(type, false).WithType<Attribute>();
             return attributes?.FirstOrDefault(a => a.GetType() == type);
         }
 
         /// <summary>
-        /// Gets the mapped name of the propery.
+        /// Gets the mapped name of the property.
         /// </summary>
         /// <param name="property">The property where the mapped name will be retrieved.</param>
         /// <returns>A string containing the mapped name.</returns>
-        public static string GetMappedName(this PropertyInfo property)
+        public static string GetMappedName(this PropertyInfo property) =>
+            GetMappedName(property, property.DeclaringType);
+
+        /// <summary>
+        /// Gets the mapped name of the property.
+        /// </summary>
+        /// <param name="property">The property where the mapped name will be retrieved.</param>
+        /// <param name="declaringType">The declaring type of the property.</param>
+        /// <returns>A string containing the mapped name.</returns>
+        internal static string GetMappedName(this PropertyInfo property,
+            Type declaringType)
         {
             var attributeName = ((MapAttribute)GetCustomAttribute(property, StaticType.MapAttribute))?.Name ??
                 ((ColumnAttribute)GetCustomAttribute(property, StaticType.ColumnAttribute))?.Name;
             return attributeName ??
-                PropertyMapper.Get(property) ??
+                PropertyMapper.Get(declaringType, property) ??
                 property.Name;
         }
 
@@ -67,7 +77,7 @@ namespace RepoDb.Extensions
         /// <param name="property">The instance of <see cref="PropertyInfo"/> to be converted.</param>
         /// <param name="entity">The entity object where the value of the property will be retrieved.</param>
         /// <returns>An instance of query field object that holds the converted name and values of the property.</returns>
-        /// <param name="appendUnderscore">The value to identify whether the underscope prefix will be appended to the parameter name.</param>
+        /// <param name="appendUnderscore">The value to identify whether the underscore prefix will be appended to the parameter name.</param>
         internal static QueryField AsQueryField(this PropertyInfo property,
             object entity,
             bool appendUnderscore) =>
@@ -129,13 +139,11 @@ namespace RepoDb.Extensions
         /// Generates a hashcode of the <see cref="PropertyInfo"/> object based on the parent class name and its own name.
         /// </summary>
         /// <param name="property">The instance of the <see cref="PropertyInfo"/> object.</param>
+        /// <param name="declaringType">The declaring type of the <see cref="PropertyInfo"/> object. This refers to the derived class if present.</param>
         /// <returns>The generated hashcode.</returns>
-        internal static int GenerateCustomizedHashCode(this PropertyInfo property)
-        {
-            return (property.DeclaringType.GetHashCode() ^
-                property.GetHashCode() ^
-                property.PropertyType.GetHashCode());
-        }
+        internal static int GenerateCustomizedHashCode(this PropertyInfo property,
+            Type declaringType) =>
+            (declaringType ?? property.DeclaringType).GetHashCode() ^ property.Name.GetHashCode() ^ property.PropertyType.GetHashCode();
 
         /// <summary>
         /// Converts an instance of <see cref="PropertyInfo"/> object into <see cref="Field"/> object.

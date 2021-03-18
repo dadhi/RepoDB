@@ -382,11 +382,6 @@ namespace RepoDb
                     transaction: transaction,
                     cache: Cache);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -441,11 +436,6 @@ namespace RepoDb
                     cache: Cache,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -498,11 +488,6 @@ namespace RepoDb
                     commandTimeout: CommandTimeout,
                     transaction: transaction,
                     cache: Cache);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -560,11 +545,6 @@ namespace RepoDb
                     cache: Cache,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -604,11 +584,6 @@ namespace RepoDb
                     commandType: commandType,
                     commandTimeout: CommandTimeout,
                     transaction: transaction);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -653,11 +628,6 @@ namespace RepoDb
                     transaction: transaction,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -671,7 +641,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <param name="commandText">The command text to be used.</param>
         /// <param name="param">
@@ -684,7 +654,7 @@ namespace RepoDb
         /// This will only work if the <see cref="Cache"/> property is set.
         /// </param>
         /// <param name="transaction">The transaction to be used.</param>
-        /// <returns>An object that holds the first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>An object that holds the first occurrence value (first column of first row) of the execution.</returns>
         public object ExecuteScalar(string commandText,
             object param = null,
             CommandType? commandType = null,
@@ -706,11 +676,6 @@ namespace RepoDb
                     transaction: transaction,
                     cache: Cache);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -724,7 +689,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database in an asynchronous way. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <param name="commandText">The command text to be used.</param>
         /// <param name="param">
@@ -738,7 +703,7 @@ namespace RepoDb
         /// </param>
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
-        /// <returns>An object that holds the first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>An object that holds the first occurrence value (first column of first row) of the execution.</returns>
         public async Task<object> ExecuteScalarAsync(string commandText,
             object param = null,
             CommandType? commandType = null,
@@ -762,11 +727,6 @@ namespace RepoDb
                     cache: Cache,
                     cancellationToken: cancellationToken);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -780,7 +740,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <typeparam name="TResult">The target return type.</typeparam>
         /// <param name="commandText">The command text to be used.</param>
@@ -794,7 +754,7 @@ namespace RepoDb
         /// This will only work if the <see cref="Cache"/> property is set.
         /// </param>
         /// <param name="transaction">The transaction to be used.</param>
-        /// <returns>A first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>A first occurrence occurrence (first column of first row) of the execution.</returns>
         public TResult ExecuteScalar<TResult>(string commandText,
             object param = null,
             CommandType? commandType = null,
@@ -816,11 +776,6 @@ namespace RepoDb
                     transaction: transaction,
                     cache: Cache);
             }
-            catch
-            {
-                // Throw back the error
-                throw;
-            }
             finally
             {
                 // Dispose the connection
@@ -834,7 +789,7 @@ namespace RepoDb
 
         /// <summary>
         /// Executes a SQL statement from the database in an asynchronous way. It uses the underlying method of <see cref="IDbCommand.ExecuteScalar"/> and
-        /// returns the first occurence value (first column of first row) of the execution.
+        /// returns the first occurrence value (first column of first row) of the execution.
         /// </summary>
         /// <typeparam name="TResult">The target return type.</typeparam>
         /// <param name="commandText">The command text to be used.</param>
@@ -849,7 +804,7 @@ namespace RepoDb
         /// </param>
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
-        /// <returns>A first occurence value (first column of first row) of the execution.</returns>
+        /// <returns>A first occurrence value (first column of first row) of the execution.</returns>
         public async Task<TResult> ExecuteScalarAsync<TResult>(string commandText,
             object param = null,
             CommandType? commandType = null,
@@ -872,11 +827,6 @@ namespace RepoDb
                     transaction: transaction,
                     cache: Cache,
                     cancellationToken: cancellationToken);
-            }
-            catch
-            {
-                // Throw back the error
-                throw;
             }
             finally
             {
@@ -942,7 +892,7 @@ namespace RepoDb
         /// <param name="transaction">The transaction to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>An instance of <see cref="QueryMultipleExtractor"/> used to extract the results.</returns>
-        public async Task<QueryMultipleExtractor> ExecuteQueryMultipleAsync(string commandText,
+        public Task<QueryMultipleExtractor> ExecuteQueryMultipleAsync(string commandText,
             object param = null,
             CommandType? commandType = null,
             int? commandTimeout = null,
@@ -959,7 +909,7 @@ namespace RepoDb
              */
 
             // Call the method
-            return await connection.ExecuteQueryMultipleAsyncInternal(commandText: commandText,
+            return connection.ExecuteQueryMultipleAsyncInternal(commandText: commandText,
                 param: param,
                 commandType: commandType,
                 commandTimeout: commandTimeout,

@@ -277,7 +277,8 @@ namespace RepoDb
                     commandTimeout: commandTimeout,
                     transaction: transaction,
                     trace: trace,
-                    statementBuilder: statementBuilder);
+                    statementBuilder: statementBuilder,
+                    cancellationToken: cancellationToken);
             }
             else
             {
@@ -290,7 +291,8 @@ namespace RepoDb
                     commandTimeout: commandTimeout,
                     transaction: transaction,
                     trace: trace,
-                    statementBuilder: statementBuilder);
+                    statementBuilder: statementBuilder,
+                    cancellationToken: cancellationToken);
             }
         }
 
@@ -491,7 +493,7 @@ namespace RepoDb
                             // Actual Execution
                             var returnValue = Converter.DbNullToNull(command.ExecuteScalar());
 
-                            // Get explicity if needed
+                            // Get explicitly if needed
                             if (Equals(returnValue, null) == true && dbSetting.IsMultiStatementExecutable == false)
                             {
                                 returnValue = Converter.DbNullToNull(connection.GetDbHelper().GetScopeIdentity(connection, transaction));
@@ -543,6 +545,7 @@ namespace RepoDb
                             else
                             {
                                 context.MultipleDataEntitiesParametersSetterFunc?.Invoke(command, batchItems);
+                                AddOrderColumnParameters(command, batchItems);
                             }
 
                             // Prepare the command
@@ -554,24 +557,26 @@ namespace RepoDb
                             // Actual Execution
                             if (context.IdentityPropertySetterFunc == null)
                             {
+                                // No identity setters
                                 result += command.ExecuteNonQuery();
                             }
                             else
                             {
+                                // Set the identity back
                                 using (var reader = command.ExecuteReader())
                                 {
-                                    var index = 0;
-
                                     // Get the results
+                                    var position = 0;
                                     do
                                     {
                                         if (reader.Read())
                                         {
                                             var value = Converter.DbNullToNull(reader.GetValue(0));
+                                            var index = batchItems.Count > 1 && reader.FieldCount > 1 ? reader.GetInt32(1) : position;
                                             context.IdentityPropertySetterFunc.Invoke(batchItems[index], value);
                                             result++;
                                         }
-                                        index++;
+                                        position++;
                                     }
                                     while (reader.NextResult());
                                 }
@@ -605,11 +610,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterInsertAll(new TraceLog(sessionId, context.CommandText, entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterInsertAll(new TraceLog(sessionId, context.CommandText, entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -730,7 +732,7 @@ namespace RepoDb
                             // Actual Execution
                             var returnValue = Converter.DbNullToNull(await command.ExecuteScalarAsync(cancellationToken));
 
-                            // Get explicity if needed
+                            // Get explicitly if needed
                             if (Equals(returnValue, null) == true && dbSetting.IsMultiStatementExecutable == false)
                             {
                                 returnValue = Converter.DbNullToNull(await connection.GetDbHelper().GetScopeIdentityAsync(connection, transaction, cancellationToken));
@@ -783,6 +785,7 @@ namespace RepoDb
                             else
                             {
                                 context.MultipleDataEntitiesParametersSetterFunc?.Invoke(command, batchItems);
+                                AddOrderColumnParameters<TEntity>(command, batchItems);
                             }
 
                             // Prepare the command
@@ -794,24 +797,27 @@ namespace RepoDb
                             // Actual Execution
                             if (context.IdentityPropertySetterFunc == null)
                             {
+                                // No identity setters
                                 result += await command.ExecuteNonQueryAsync(cancellationToken);
                             }
                             else
                             {
-                                using (var reader = (DbDataReader)await command.ExecuteReaderAsync(cancellationToken))
+                                // Set the identity back
+                                using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                                 {
-                                    var index = 0;
-
                                     // Get the results
+                                    var position = 0;
                                     do
                                     {
                                         if (await reader.ReadAsync(cancellationToken))
                                         {
+                                            // No need to use async on this level (await reader.GetFieldValueAsync<object>(0, cancellationToken))
                                             var value = Converter.DbNullToNull(reader.GetValue(0));
+                                            var index = batchItems.Count > 1 && reader.FieldCount > 1 ? reader.GetInt32(1) : position;
                                             context.IdentityPropertySetterFunc.Invoke(batchItems[index], value);
                                             result++;
                                         }
-                                        index++;
+                                        position++;
                                     }
                                     while (await reader.NextResultAsync(cancellationToken));
                                 }
@@ -845,11 +851,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterInsertAll(new TraceLog(sessionId, context.CommandText, entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterInsertAll(new TraceLog(sessionId, context.CommandText, entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

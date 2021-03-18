@@ -140,7 +140,7 @@ namespace RepoDb.DbHelpers
             return new DbField(await reader.GetFieldValueAsync<string>(0, cancellationToken),
                 await reader.GetFieldValueAsync<bool>(1, cancellationToken),
                 await reader.GetFieldValueAsync<bool>(2, cancellationToken),
-                await reader.GetFieldValueAsync<bool>(1, cancellationToken),
+                await reader.GetFieldValueAsync<bool>(3, cancellationToken),
                 DbTypeResolver.Resolve(columnType),
                 size,
                 await reader.IsDBNullAsync(6, cancellationToken) ? (byte?)null : byte.Parse((await reader.GetFieldValueAsync<int>(6, cancellationToken)).ToString()),
@@ -190,7 +190,7 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// Gets the list of <see cref="DbField"/> of the table in an asychronous way.
+        /// Gets the list of <see cref="DbField"/> of the table in an asynchronous way.
         /// </summary>
         /// <param name="connection">The instance of the connection object.</param>
         /// <param name="tableName">The name of the target table.</param>
@@ -246,17 +246,17 @@ namespace RepoDb.DbHelpers
         }
 
         /// <summary>
-        /// Gets the newly generated identity from the database in an asychronous way.
+        /// Gets the newly generated identity from the database in an asynchronous way.
         /// </summary>
         /// <param name="connection">The instance of the connection object.</param>
         /// <param name="transaction">The transaction object that is currently in used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The newly generated identity from the database.</returns>
-        public async Task<object> GetScopeIdentityAsync(IDbConnection connection,
+        public Task<object> GetScopeIdentityAsync(IDbConnection connection,
             IDbTransaction transaction = null,
             CancellationToken cancellationToken = default)
         {
-            return await connection.ExecuteScalarAsync("SELECT LAST_INSERT_ID();", transaction: transaction,
+            return connection.ExecuteScalarAsync("SELECT LAST_INSERT_ID();", transaction: transaction,
                 cancellationToken: cancellationToken);
         }
 

@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map a class into its equivalent database object (ie: Table, View). This is an alternative class to <see cref="MapAttribute"/> object for class mapping.
+    /// A class that is being used to map a class into its equivalent database object (ie: Table, View). This is an alternative class to <see cref="MapAttribute"/> object for class mapping.
     /// </summary>
     public static class ClassMapper
     {
@@ -66,10 +66,9 @@ namespace RepoDb
 
             // Variables
             var key = entityType.GetHashCode();
-            var value = (string)null;
 
             // Try get the cache
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -109,11 +108,10 @@ namespace RepoDb
         /// <returns>The mapped name of the class.</returns>
         public static string Get(Type entityType)
         {
-            var value = (string)null;
             var key = entityType.GetHashCode();
 
             // Try get the value
-            maps.TryGetValue(key, out value);
+            maps.TryGetValue(key, out var value);
 
             // Return the value
             return value;

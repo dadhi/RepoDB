@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the database object name mappings of the data entity type.
+    /// A class that is being used to cache the database object name mappings of the data entity type.
     /// </summary>
     public static class ClassMappedNameCache
     {
@@ -36,10 +36,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType);
-            var result = (string)null;
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 result = resolver.Resolve(entityType);
                 cache.TryAdd(key, result);

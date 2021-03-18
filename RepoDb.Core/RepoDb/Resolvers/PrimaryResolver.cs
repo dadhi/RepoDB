@@ -1,20 +1,14 @@
-﻿using RepoDb.Extensions;
-using RepoDb.Interfaces;
+﻿using RepoDb.Interfaces;
 using System;
 using System.Linq;
 
 namespace RepoDb.Resolvers
 {
     /// <summary>
-    /// A class that is used to resolve the primary property of the data entity type.
+    /// A class that is being used to resolve the primary property of the data entity type.
     /// </summary>
     public class PrimaryResolver : IResolver<Type, ClassProperty>
     {
-        /// <summary>
-        /// Creates a new instance of <see cref="PrimaryResolver"/> object.
-        /// </summary>
-        public PrimaryResolver() { }
-
         /// <summary>
         /// Resolves the primary <see cref="ClassProperty"/> of the data entity type.
         /// </summary>
@@ -52,7 +46,7 @@ namespace RepoDb.Resolvers
             if (property == null)
             {
                 property = properties
-                    .FirstOrDefault(p => 
+                    .FirstOrDefault(p =>
                         string.Equals(p.PropertyInfo.Name, string.Concat(p.GetDeclaringType().Name, "id"), StringComparison.OrdinalIgnoreCase));
             }
 

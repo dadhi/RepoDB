@@ -53,8 +53,8 @@ namespace RepoDb.StatementBuilders
         public override string CreateBatchQuery(QueryBuilder queryBuilder,
             string tableName,
             IEnumerable<Field> fields,
-            int? page,
-            int? rowsPerBatch,
+            int page,
+            int rowsPerBatch,
             IEnumerable<OrderField> orderBy = null,
             QueryGroup where = null,
             string hints = null)
@@ -72,21 +72,21 @@ namespace RepoDb.StatementBuilders
             }
 
             // Validate order by
-            if (orderBy == null || orderBy?.Any() != true)
+            if (orderBy == null || orderBy.Any() != true)
             {
                 throw new EmptyException("The argument 'orderBy' is required.");
             }
 
             // Validate the page
-            if (page == null || page < 0)
+            if (page < 0)
             {
-                throw new ArgumentOutOfRangeException("The page must be equals or greater than 0.");
+                throw new ArgumentOutOfRangeException(nameof(page), "The page must be equals or greater than 0.");
             }
 
             // Validate the page
-            if (rowsPerBatch == null || rowsPerBatch < 1)
+            if (rowsPerBatch < 1)
             {
-                throw new ArgumentOutOfRangeException($"The rows per batch must be equals or greater than 1.");
+                throw new ArgumentOutOfRangeException(nameof(rowsPerBatch), "The rows per batch must be equals or greater than 1.");
             }
 
             // Skipping variables
@@ -107,7 +107,7 @@ namespace RepoDb.StatementBuilders
                 .End();
 
             // Return the query
-            return queryBuilder.GetString();
+            return builder.GetString();
         }
 
         #endregion
@@ -234,7 +234,7 @@ namespace RepoDb.StatementBuilders
 
             // Set the return value
             var result = identityField != null ?
-                string.Concat($"LAST_INSERT_ID()") :
+                "LAST_INSERT_ID()" :
                     primaryField != null ? primaryField.Name.AsParameter(DbSetting) : "NULL";
 
             builder
@@ -292,8 +292,8 @@ namespace RepoDb.StatementBuilders
                 for (var index = 0; index < splitted.Length; index++)
                 {
                     var line = splitted[index].Trim();
-                    var returnValue = "SELECT LAST_INSERT_ID()";
-                    commandTexts.Add(string.Concat(line, " ; ", returnValue, " ;"));
+                    commandTexts.Add(string.Concat(line, " ; SELECT LAST_INSERT_ID() AS ", "Id".AsQuoted(DbSetting), ", ",
+                        $"@__RepoDb_OrderColumn_{index} AS ", "OrderColumn".AsQuoted(DbSetting), " ;"));
                 }
 
                 // Set the command text
@@ -394,21 +394,10 @@ namespace RepoDb.StatementBuilders
                 throw new NullReferenceException($"The list of fields cannot be null or empty.");
             }
 
-            // Check the primay field
+            // Validate the Primary Key
             if (primaryField == null)
             {
-                throw new PrimaryFieldNotFoundException($"MySql is using the primary key as qualifier for merge operation.");
-            }
-
-            // Check the qualifiers
-            if (qualifiers?.Any() == true)
-            {
-                var others = qualifiers.Where(f => !string.Equals(f.Name, primaryField?.Name, StringComparison.OrdinalIgnoreCase));
-                if (others?.Any() == true)
-                {
-                    throw new InvalidQualifiersException($"MySql is using the primary key as qualifier for merge operation. " +
-                        $"Consider creating 'PrimaryKey' in the {tableName} and set the 'qualifiers' to NULL.");
-                }
+                throw new PrimaryFieldNotFoundException($"The is no primary field from the table '{tableName}'.");
             }
 
             // Initialize the builder
@@ -420,13 +409,13 @@ namespace RepoDb.StatementBuilders
             // Check both primary and identity
             if (identityField != null && !string.Equals(identityField.Name, primaryField.Name, StringComparison.OrdinalIgnoreCase))
             {
-                result = string.Concat($"(CASE WHEN {identityField.Name.AsParameter(DbSetting)} > 0 THEN " +
+                result = $"(CASE WHEN {identityField.Name.AsParameter(DbSetting)} > 0 THEN " +
                     $"{identityField.Name.AsParameter(DbSetting)} ELSE " +
-                    $"{primaryField.Name.AsParameter(DbSetting)} END)");
+                    $"{primaryField.Name.AsParameter(DbSetting)} END)";
             }
             else
             {
-                result = string.Concat($"COALESCE({primaryField.Name.AsParameter(DbSetting)}, LAST_INSERT_ID())");
+                result = $"COALESCE({primaryField.Name.AsParameter(DbSetting)}, LAST_INSERT_ID())";
             }
 
             // Build the query
@@ -497,21 +486,10 @@ namespace RepoDb.StatementBuilders
                 throw new NullReferenceException($"The list of fields cannot be null or empty.");
             }
 
-            // Check the primay field
+            // Validate the Primary Key
             if (primaryField == null)
             {
-                throw new PrimaryFieldNotFoundException($"MySql is using the primary key as qualifier for merge operation.");
-            }
-
-            // Check the qualifiers
-            if (qualifiers?.Any() == true)
-            {
-                var others = qualifiers.Where(f => !string.Equals(f.Name, primaryField?.Name, StringComparison.OrdinalIgnoreCase));
-                if (others?.Any() == true)
-                {
-                    throw new InvalidQualifiersException($"MySql is using the primary key as qualifier for merge operation. " +
-                        $"Consider creating 'PrimaryKey' in the {tableName} and set the 'qualifiers' to NULL.");
-                }
+                throw new PrimaryFieldNotFoundException($"The is no primary field from the table '{tableName}'.");
             }
 
             // Initialize the builder
@@ -546,13 +524,13 @@ namespace RepoDb.StatementBuilders
                 // Check both primary and identity
                 if (identityField != null && !string.Equals(identityField.Name, primaryField.Name, StringComparison.OrdinalIgnoreCase))
                 {
-                    result = string.Concat($"(CASE WHEN {identityField.Name.AsParameter(index, DbSetting)} > 0 THEN " +
+                    result = $"(CASE WHEN {identityField.Name.AsParameter(index, DbSetting)} > 0 THEN " +
                         $"{identityField.Name.AsParameter(index, DbSetting)} ELSE " +
-                        $"{primaryField.Name.AsParameter(index, DbSetting)} END)");
+                        $"{primaryField.Name.AsParameter(index, DbSetting)} END)";
                 }
                 else
                 {
-                    result = string.Concat($"COALESCE({primaryField.Name.AsParameter(index, DbSetting)}, LAST_INSERT_ID())");
+                    result = $"COALESCE({primaryField.Name.AsParameter(index, DbSetting)}, LAST_INSERT_ID())";
                 }
 
                 if (!string.IsNullOrEmpty(result))
@@ -560,10 +538,13 @@ namespace RepoDb.StatementBuilders
                     // Set the result
                     builder
                         .Select()
-                        .WriteText(result)
-                        .As("Result".AsQuoted(DbSetting))
-                        .End();
+                        .WriteText(string.Concat(result, " AS ", "Id".AsQuoted(DbSetting), ","))
+                        .WriteText(string.Concat($"{DbSetting.ParameterPrefix}__RepoDb_OrderColumn_{index}", " AS ", "OrderColumn".AsQuoted(DbSetting)));
                 }
+
+                // End the builder
+                builder
+                    .End();
             }
 
             // Return the query
@@ -664,12 +645,12 @@ namespace RepoDb.StatementBuilders
             if (orderBy != null)
             {
                 // Check if the order fields are present in the given fields
-                var unmatchesOrderFields = orderBy?.Where(orderField =>
-                    fields?.FirstOrDefault(f =>
+                var unmatchesOrderFields = orderBy.Where(orderField =>
+                    fields.FirstOrDefault(f =>
                         string.Equals(orderField.Name, f.Name, StringComparison.OrdinalIgnoreCase)) == null);
 
                 // Throw an error we found any unmatches
-                if (unmatchesOrderFields?.Any() == true)
+                if (unmatchesOrderFields.Any() == true)
                 {
                     throw new MissingFieldsException($"The order fields '{unmatchesOrderFields.Select(field => field.Name).Join(", ")}' are not " +
                         $"present at the given fields '{fields.Select(field => field.Name).Join(", ")}'.");

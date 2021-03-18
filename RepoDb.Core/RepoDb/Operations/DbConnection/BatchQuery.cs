@@ -1709,7 +1709,7 @@ namespace RepoDb
             var param = (object)null;
             var sessionId = Guid.Empty;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo<TEntity>() });
@@ -1750,11 +1750,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterBatchQuery(new TraceLog(sessionId, commandText, param, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterBatchQuery(new TraceLog(sessionId, commandText, param, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result as IEnumerable<TEntity>;
@@ -1813,7 +1810,7 @@ namespace RepoDb
             var param = (object)null;
             var sessionId = Guid.Empty;
 
-            // Converts to propery mapped object
+            // Converts to property mapped object
             if (where != null)
             {
                 param = QueryGroup.AsMappedObject(new[] { where.MapTo<TEntity>() });
@@ -1855,11 +1852,8 @@ namespace RepoDb
                 skipCommandArrayParametersCheck: true);
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterBatchQuery(new TraceLog(sessionId, commandText, param, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterBatchQuery(new TraceLog(sessionId, commandText, param, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Result
             return result as IEnumerable<TEntity>;

@@ -373,7 +373,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifier">The qualifer field to be used during merge operation.</param>
+        /// <param name="qualifier">The qualifier field to be used during merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -410,7 +410,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -521,7 +521,7 @@ namespace RepoDb
         /// <typeparam name="TResult">The target type of the result.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifier">The qualifer field to be used during merge operation.</param>
+        /// <param name="qualifier">The qualifier field to be used during merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -559,7 +559,7 @@ namespace RepoDb
         /// <typeparam name="TResult">The target type of the result.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -597,7 +597,7 @@ namespace RepoDb
         /// <typeparam name="TResult">The target type of the result.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The expresion for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -636,7 +636,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -662,7 +662,7 @@ namespace RepoDb
             // Return the result
             if (setting.IsUseUpsert == false)
             {
-                if (entity?.GetType()?.IsDictionaryStringObject() == true)
+                if (entity?.GetType().IsDictionaryStringObject() == true)
                 {
                     return MergeInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                         tableName: tableName,
@@ -691,7 +691,7 @@ namespace RepoDb
             }
             else
             {
-                if (entity?.GetType()?.IsDictionaryStringObject() == true)
+                if (entity?.GetType().IsDictionaryStringObject() == true)
                 {
                     return UpsertInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                         tableName: tableName,
@@ -1144,7 +1144,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1184,7 +1184,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1305,7 +1305,7 @@ namespace RepoDb
         /// <typeparam name="TResult">The target type of the result.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1346,7 +1346,7 @@ namespace RepoDb
         /// <typeparam name="TResult">The target type of the result.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1388,7 +1388,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
 		/// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1397,7 +1397,7 @@ namespace RepoDb
         /// <param name="statementBuilder">The statement builder object to be used.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         /// <returns>The value of the identity field if present, otherwise, the value of the primary field.</returns>
-        internal static async Task<TResult> MergeAsyncInternal<TEntity, TResult>(this IDbConnection connection,
+        internal static Task<TResult> MergeAsyncInternal<TEntity, TResult>(this IDbConnection connection,
             string tableName,
             TEntity entity,
             IEnumerable<Field> qualifiers,
@@ -1416,9 +1416,9 @@ namespace RepoDb
             // Return the result
             if (setting.IsUseUpsert == false)
             {
-                if (entity?.GetType()?.IsDictionaryStringObject() == true)
+                if (entity?.GetType().IsDictionaryStringObject() == true)
                 {
-                    return await MergeAsyncInternalBase<IDictionary<string, object>, TResult>(connection: connection,
+                    return MergeAsyncInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                         tableName: tableName,
                         entity: (IDictionary<string, object>)entity,
                         qualifiers: qualifiers,
@@ -1432,7 +1432,7 @@ namespace RepoDb
                 }
                 else
                 {
-                    return await MergeAsyncInternalBase<TEntity, TResult>(connection: connection,
+                    return MergeAsyncInternalBase<TEntity, TResult>(connection: connection,
                         tableName: tableName,
                         entity: entity,
                         qualifiers: qualifiers,
@@ -1447,9 +1447,9 @@ namespace RepoDb
             }
             else
             {
-                if (entity?.GetType()?.IsDictionaryStringObject() == true)
+                if (entity?.GetType().IsDictionaryStringObject() == true)
                 {
-                    return await UpsertAsyncInternalBase<IDictionary<string, object>, TResult>(connection: connection,
+                    return UpsertAsyncInternalBase<IDictionary<string, object>, TResult>(connection: connection,
                         tableName: tableName,
                         entity: (IDictionary<string, object>)entity,
                         qualifiers: qualifiers,
@@ -1463,7 +1463,7 @@ namespace RepoDb
                 }
                 else
                 {
-                    return await UpsertAsyncInternalBase<TEntity, TResult>(connection: connection,
+                    return UpsertAsyncInternalBase<TEntity, TResult>(connection: connection,
                         tableName: tableName,
                         entity: entity,
                         qualifiers: qualifiers,
@@ -1958,7 +1958,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The data entity or dynamic object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -2038,11 +2038,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMerge(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMerge(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -2060,7 +2057,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The data entity or dynamic object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -2220,11 +2217,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMerge(new TraceLog(sessionId, "Upsert.After", entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMerge(new TraceLog(sessionId, "Upsert.After", entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -2243,7 +2237,7 @@ namespace RepoDb
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The data entity or dynamic object to be merged.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
         /// <param name="transaction">The transaction to be used.</param>
@@ -2325,11 +2319,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMerge(new TraceLog(sessionId, context.CommandText, entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMerge(new TraceLog(sessionId, context.CommandText, entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -2348,7 +2339,7 @@ namespace RepoDb
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entity">The data entity or dynamic object to be merged.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
         /// <param name="commandTimeout">The command timeout in seconds to be used.</param>
         /// <param name="transaction">The transaction to be used.</param>
@@ -2512,11 +2503,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMerge(new TraceLog(sessionId, "Upsert.After", entity, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMerge(new TraceLog(sessionId, "Upsert.After", entity, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

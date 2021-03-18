@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to extract the multiple resultsets of the 'ExecuteQueryMultiple' operation.
+    /// A class that is being used to extract the multiple resultsets of the 'ExecuteQueryMultiple' operation.
     /// </summary>
     public sealed class QueryMultipleExtractor : IDisposable
     {
@@ -21,6 +21,7 @@ namespace RepoDb
         private DbConnection connection = null;
         private DbDataReader reader = null;
         private bool isDisposeConnection = false;
+        private object param = null;
 
         /// <summary>
         /// Creates a new instance of <see cref="QueryMultipleExtractor"/> class.
@@ -28,15 +29,18 @@ namespace RepoDb
         /// <param name="connection">The instance of the <see cref="DbConnection"/> object that is current in used.</param>
         /// <param name="reader">The instance of the <see cref="DbDataReader"/> object to be extracted.</param>
         /// <param name="isDisposeConnection">The flag that is used to define whether the associated <paramref name="connection"/> object will be disposed during the disposition process.</param>
+        /// <param name="param">The parameter in used during the execution.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> object to be used during the asynchronous operation.</param>
         internal QueryMultipleExtractor(DbConnection connection,
             DbDataReader reader,
             bool isDisposeConnection = false,
+            object param = null,
             CancellationToken cancellationToken = default)
         {
             this.connection = connection;
             this.reader = reader;
             this.isDisposeConnection = isDisposeConnection;
+            this.param = param;
             Position = 0;
             CancellationToken = cancellationToken;
         }
@@ -46,11 +50,17 @@ namespace RepoDb
         /// </summary>
         public void Dispose()
         {
+            // Reader
             reader?.Dispose();
+
+            // Connection
             if (isDisposeConnection == true)
             {
                 connection?.Dispose();
             }
+
+            // Set the output parameters
+            DbConnectionExtension.SetOutputParameters(param);
         }
 
         #region Properties

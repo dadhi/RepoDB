@@ -9,7 +9,7 @@ using System.Reflection;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map a .NET CLR type or a class property into a <see cref="IPropertyHandler{TInput, TResult}"/> object.
+    /// A class that is being used to map a .NET CLR type or a class property into a <see cref="IPropertyHandler{TInput, TResult}"/> object.
     /// </summary>
     public static class PropertyHandlerMapper
     {
@@ -64,10 +64,9 @@ namespace RepoDb
 
             // Variables for cache
             var key = GenerateHashCode(type);
-            var value = (object)null;
 
             // Try get the mappings
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -111,11 +110,8 @@ namespace RepoDb
             // Check the presence
             GuardPresence(type);
 
-            // Variables for the cache
-            var value = (object)null;
-
             // Get the value
-            maps.TryGetValue(GenerateHashCode(type), out value);
+            maps.TryGetValue(GenerateHashCode(type), out var value);
 
             // Check the result
             if (value == null || value is TPropertyHandler)
@@ -408,10 +404,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var value = (object)null;
 
             // Try get the cache
-            if (maps.TryGetValue(key, out value))
+            if (maps.TryGetValue(key, out var value))
             {
                 if (force)
                 {
@@ -494,11 +489,10 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var value = (object)null;
             var result = default(TPropertyHandler);
 
             // Try get the value
-            if (maps.TryGetValue(key, out value) == true)
+            if (maps.TryGetValue(key, out var value) == true)
             {
                 result = Converter.ToType<TPropertyHandler>(value);
             }

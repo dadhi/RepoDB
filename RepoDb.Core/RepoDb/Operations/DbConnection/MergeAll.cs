@@ -68,7 +68,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifier">The qualifer field to be used during merge operation.</param>
+        /// <param name="qualifier">The qualifier field to be used during merge operation.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -110,7 +110,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -152,7 +152,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -231,7 +231,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifier">The qualifer field to be used during merge operation.</param>
+        /// <param name="qualifier">The qualifier field to be used during merge operation.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -271,7 +271,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -311,7 +311,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -352,7 +352,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -547,7 +547,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -592,7 +592,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -720,7 +720,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -763,7 +763,7 @@ namespace RepoDb
         /// <typeparam name="TEntity">The type of the data entity.</typeparam>
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The expression for the qualifer fields.</param>
+        /// <param name="qualifiers">The expression for the qualifier fields.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -807,7 +807,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The list of data entity objects to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -1175,7 +1175,7 @@ namespace RepoDb
         /// <param name="entities">The data entity or dynamic object to be merged.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
 		/// <param name="commandTimeout">The command timeout in seconds to be used.</param>
         /// <param name="transaction">The transaction to be used.</param>
@@ -1328,6 +1328,7 @@ namespace RepoDb
                             else
                             {
                                 context.MultipleDataEntitiesParametersSetterFunc?.Invoke(command, batchItems);
+                                AddOrderColumnParameters(command, batchItems);
                             }
 
                             // Prepare the command
@@ -1347,16 +1348,18 @@ namespace RepoDb
                                 // Set the identity back
                                 using (var reader = command.ExecuteReader())
                                 {
-                                    var index = 0;
+                                    // Get the results
+                                    var position = 0;
                                     do
                                     {
                                         if (reader.Read())
                                         {
                                             var value = Converter.DbNullToNull(reader.GetValue(0));
+                                            var index = batchItems.Count > 1 && reader.FieldCount > 1 ? reader.GetInt32(1) : position;
                                             context.IdentityPropertySetterFunc.Invoke(batchItems[index], value);
                                             result++;
                                         }
-                                        index++;
+                                        position++;
                                     }
                                     while (reader.NextResult());
                                 }
@@ -1390,11 +1393,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMergeAll(new TraceLog(sessionId, context.CommandText, entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMergeAll(new TraceLog(sessionId, context.CommandText, entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -1411,7 +1411,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The data entity or dynamic object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
 		/// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1433,7 +1433,6 @@ namespace RepoDb
         {
             // Variables needed
             var type = entities?.FirstOrDefault()?.GetType() ?? typeof(TEntity);
-            var isObjectType = typeof(TEntity) == StaticType.Object;
             var dbFields = DbFieldCache.Get(connection, tableName, transaction);
             var primary = dbFields?.FirstOrDefault(dbField => dbField.IsPrimary);
             var properties = (IEnumerable<ClassProperty>)null;
@@ -1551,11 +1550,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMergeAll(new TraceLog(sessionId, "UpsertAll.After", entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMergeAll(new TraceLog(sessionId, "UpsertAll.After", entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -1572,7 +1568,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The data entity or dynamic object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="batchSize">The batch size of the merge operation.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
@@ -1731,6 +1727,7 @@ namespace RepoDb
                             else
                             {
                                 context.MultipleDataEntitiesParametersSetterFunc?.Invoke(command, batchItems);
+                                AddOrderColumnParameters<TEntity>(command, batchItems);
                             }
 
                             // Prepare the command
@@ -1750,16 +1747,19 @@ namespace RepoDb
                                 // Set the identity back
                                 using (var reader = await command.ExecuteReaderAsync(cancellationToken))
                                 {
-                                    var index = 0;
+                                    // Get the results
+                                    var position = 0;
                                     do
                                     {
                                         if (await reader.ReadAsync(cancellationToken))
                                         {
+                                            // No need to use async on this level (await reader.GetFieldValueAsync<object>(0, cancellationToken))
                                             var value = Converter.DbNullToNull(reader.GetValue(0));
+                                            var index = batchItems.Count > 1 && reader.FieldCount > 1 ? reader.GetInt32(1) : position;
                                             context.IdentityPropertySetterFunc.Invoke(batchItems[index], value);
                                             result++;
                                         }
-                                        index++;
+                                        position++;
                                     }
                                     while (await reader.NextResultAsync(cancellationToken));
                                 }
@@ -1793,11 +1793,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMergeAll(new TraceLog(sessionId, context.CommandText, entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMergeAll(new TraceLog(sessionId, context.CommandText, entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;
@@ -1814,7 +1811,7 @@ namespace RepoDb
         /// <param name="connection">The connection object to be used.</param>
         /// <param name="tableName">The name of the target table to be used.</param>
         /// <param name="entities">The data entity or dynamic object to be merged.</param>
-        /// <param name="qualifiers">The list of qualifer fields to be used.</param>
+        /// <param name="qualifiers">The list of qualifier fields to be used.</param>
         /// <param name="fields">The mapping list of <see cref="Field"/> objects to be used.</param>
         /// <param name="hints">The table hints to be used.</param>
 		/// <param name="commandTimeout">The command timeout in seconds to be used.</param>
@@ -1838,7 +1835,6 @@ namespace RepoDb
         {
             // Variables needed
             var type = entities?.FirstOrDefault()?.GetType() ?? typeof(TEntity);
-            var isObjectType = typeof(TEntity) == StaticType.Object;
             var dbFields = await DbFieldCache.GetAsync(connection, tableName, transaction, cancellationToken);
             var primary = dbFields?.FirstOrDefault(dbField => dbField.IsPrimary);
             var properties = (IEnumerable<ClassProperty>)null;
@@ -1957,11 +1953,8 @@ namespace RepoDb
             }
 
             // After Execution
-            if (trace != null)
-            {
-                trace.AfterMergeAll(new TraceLog(sessionId, "UpsertAll.After", entities, result,
-                    DateTime.UtcNow.Subtract(beforeExecutionTime)));
-            }
+            trace?.AfterMergeAll(new TraceLog(sessionId, "UpsertAll.After", entities, result,
+                DateTime.UtcNow.Subtract(beforeExecutionTime)));
 
             // Return the result
             return result;

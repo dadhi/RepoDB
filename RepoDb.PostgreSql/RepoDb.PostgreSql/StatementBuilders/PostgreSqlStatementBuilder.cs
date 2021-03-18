@@ -54,8 +54,8 @@ namespace RepoDb.StatementBuilders
         public override string CreateBatchQuery(QueryBuilder queryBuilder,
             string tableName,
             IEnumerable<Field> fields,
-            int? page,
-            int? rowsPerBatch,
+            int page,
+            int rowsPerBatch,
             IEnumerable<OrderField> orderBy = null,
             QueryGroup where = null,
             string hints = null)
@@ -73,21 +73,21 @@ namespace RepoDb.StatementBuilders
             }
 
             // Validate order by
-            if (orderBy == null || orderBy?.Any() != true)
+            if (orderBy == null || orderBy.Any() != true)
             {
                 throw new EmptyException("The argument 'orderBy' is required.");
             }
 
             // Validate the page
-            if (page == null || page < 0)
+            if (page < 0)
             {
-                throw new ArgumentOutOfRangeException("The page must be equals or greater than 0.");
+                throw new ArgumentOutOfRangeException(nameof(page), "The page must be equals or greater than 0.");
             }
 
             // Validate the page
-            if (rowsPerBatch == null || rowsPerBatch < 1)
+            if (rowsPerBatch < 1)
             {
-                throw new ArgumentOutOfRangeException($"The rows per batch must be equals or greater than 1.");
+                throw new ArgumentOutOfRangeException(nameof(rowsPerBatch), "The rows per batch must be equals or greater than 1.");
             }
 
             // Skipping variables
@@ -108,7 +108,7 @@ namespace RepoDb.StatementBuilders
                 .End();
 
             // Return the query
-            return queryBuilder.GetString();
+            return builder.GetString();
         }
 
         #endregion
@@ -201,7 +201,7 @@ namespace RepoDb.StatementBuilders
             var result = identityField != null ?
                 string.IsNullOrEmpty(databaseType) ?
                     identityField.Name.AsQuoted(DbSetting) :
-                        string.Concat($"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})") :
+                        $"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})" :
                             primaryField != null ? primaryField.Name.AsQuoted(DbSetting) : "NULL";
 
             // Get the string
@@ -263,29 +263,27 @@ namespace RepoDb.StatementBuilders
                 }
             }
 
-            if (identityField != null)
+            // Variables needed
+            var commandTexts = new List<string>();
+            var splitted = commandText.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            // Iterate the indexes
+            for (var index = 0; index < splitted.Length; index++)
             {
-                // Variables needed
-                var commandTexts = new List<string>();
-                var splitted = commandText.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                var line = splitted[index].Trim();
 
-                // Iterate the indexes
-                for (var index = 0; index < splitted.Length; index++)
-                {
-                    var line = splitted[index].Trim();
-
-                    // Set the return value
-                    var returnValue = identityField != null ?
-                        string.IsNullOrEmpty(databaseType) ?
-                            identityField.Name.AsQuoted(DbSetting) :
-                                string.Concat($"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})") :
-                                    primaryField != null ? primaryField.Name.AsQuoted(DbSetting) : "NULL";
-                    commandTexts.Add(string.Concat(line, " RETURNING ", returnValue, " AS ", "Result".AsQuoted(DbSetting), " ;"));
-                }
-
-                // Set the command text
-                commandText = commandTexts.Join(" ");
+                // Set the return value
+                var returnValue = identityField != null ?
+                    string.IsNullOrEmpty(databaseType) ?
+                        identityField.Name.AsQuoted(DbSetting) :
+                        $"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})" :
+                    primaryField != null ? primaryField.Name.AsQuoted(DbSetting) : "NULL";
+                commandTexts.Add(string.Concat(line, " RETURNING ", returnValue, " AS ", "Id".AsQuoted(DbSetting), ", ",
+                    $"{DbSetting.ParameterPrefix}__RepoDb_OrderColumn_{index} AS ", "OrderColumn".AsQuoted(DbSetting), " ;"));
             }
+
+            // Set the command text
+            commandText = commandTexts.Join(" ");
 
             // Return the query
             return commandText;
@@ -326,33 +324,29 @@ namespace RepoDb.StatementBuilders
                 throw new NullReferenceException($"The list of fields cannot be null or empty.");
             }
 
-            // Check the primay field
-            if (primaryField == null)
-            {
-                throw new PrimaryFieldNotFoundException($"PostgreSql is using the primary key as qualifier for (INSERT or REPLACE) operation.");
-            }
-
-            // Check the qualifiers
-            if (qualifiers?.Any() == true)
-            {
-                var others = qualifiers.Where(f => !string.Equals(f.Name, primaryField?.Name, StringComparison.OrdinalIgnoreCase));
-                if (others?.Any() == true)
-                {
-                    throw new InvalidQualifiersException($"PostgreSql is using the primary key as qualifier for (INSERT or REPLACE) operation. " +
-                        $"Consider creating 'PrimaryKey' in the {tableName} and set the 'qualifiers' to NULL.");
-                }
-            }
-
             // Set the qualifiers
-            if (qualifiers?.Any() != true)
+            if (qualifiers?.Any() != true && primaryField != null)
             {
                 qualifiers = primaryField.AsField().AsEnumerable();
+            }
+
+            // Validate the qualifiers
+            if (qualifiers?.Any() != true)
+            {
+                if (primaryField == null)
+                {
+                    throw new PrimaryFieldNotFoundException($"The is no primary field from the table '{tableName}' that can be used as qualifier.");
+                }
+                else
+                {
+                    throw new InvalidQualifiersException($"There are no defined qualifier fields.");
+                }
             }
 
             // Initialize the builder
             var builder = queryBuilder ?? new QueryBuilder();
 
-            // Remove the qualifers from the fields
+            // Remove the qualifiers from the fields
             var updatableFields = fields
                 .Where(f =>
                     qualifiers?.Any(qf => string.Equals(qf.Name, f.Name, StringComparison.OrdinalIgnoreCase)) != true)
@@ -398,11 +392,9 @@ namespace RepoDb.StatementBuilders
             }
 
             // Set the return value
-            var result = identityField != null ?
-                string.IsNullOrEmpty(databaseType) ?
-                    identityField.Name.AsQuoted(DbSetting) :
-                        string.Concat($"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})") :
-                            primaryField != null ? primaryField.Name.AsParameter(DbSetting) : "NULL";
+            var result = identityField == null ? primaryField.Name.AsParameter(DbSetting) :
+                string.IsNullOrEmpty(databaseType) ? identityField.Name.AsQuoted(DbSetting) :
+                $"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})";
 
             if (!string.IsNullOrEmpty(result))
             {
@@ -458,27 +450,23 @@ namespace RepoDb.StatementBuilders
                 throw new NullReferenceException($"The list of fields cannot be null or empty.");
             }
 
-            // Check the primary field
-            if (primaryField == null)
-            {
-                throw new PrimaryFieldNotFoundException($"PostgreSql is using the primary key as qualifier for (INSERT or REPLACE) operation.");
-            }
-
-            // Check the qualifiers
-            if (qualifiers?.Any() == true)
-            {
-                var others = qualifiers.Where(f => !string.Equals(f.Name, primaryField?.Name, StringComparison.OrdinalIgnoreCase));
-                if (others?.Any() == true)
-                {
-                    throw new InvalidQualifiersException($"PostgreSql is using the primary key as qualifier for (INSERT or REPLACE) operation. " +
-                        $"Consider creating 'PrimaryKey' in the {tableName} and set the 'qualifiers' to NULL.");
-                }
-            }
-
             // Set the qualifiers
-            if (qualifiers?.Any() != true)
+            if (qualifiers?.Any() != true && primaryField != null)
             {
                 qualifiers = primaryField.AsField().AsEnumerable();
+            }
+
+            // Validate the qualifiers
+            if (qualifiers?.Any() != true)
+            {
+                if (primaryField == null)
+                {
+                    throw new PrimaryFieldNotFoundException($"The is no primary field from the table '{tableName}' that can be used as qualifier.");
+                }
+                else
+                {
+                    throw new InvalidQualifiersException($"There are no defined qualifier fields.");
+                }
             }
 
             // Initialize the builder
@@ -504,11 +492,9 @@ namespace RepoDb.StatementBuilders
             }
 
             // Set the return value
-            var result = identityField != null ?
-                string.IsNullOrEmpty(databaseType) ?
-                    identityField.Name.AsQuoted(DbSetting) :
-                        string.Concat($"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})") :
-                            primaryField != null ? primaryField.Name.AsParameter(DbSetting) : "NULL";
+            var result = identityField == null ? primaryField.Name.AsParameter(DbSetting) :
+                string.IsNullOrEmpty(databaseType) ? identityField.Name.AsQuoted(DbSetting) :
+                $"CAST({identityField.Name.AsQuoted(DbSetting)} AS {databaseType})";
 
             // Clear the builder
             builder.Clear();
@@ -545,7 +531,8 @@ namespace RepoDb.StatementBuilders
                 if (!string.IsNullOrEmpty(result))
                 {
                     // Get the string
-                    var sql = string.Concat("RETURNING ", result, " AS ", "Result".AsQuoted(DbSetting));
+                    var sql = string.Concat("RETURNING ", result, " AS ", "Id".AsQuoted(DbSetting), ", ",
+                        $"{DbSetting.ParameterPrefix}__RepoDb_OrderColumn_{index}", " AS ", "OrderColumn".AsQuoted(DbSetting));
 
                     // Set the result
                     builder
@@ -599,12 +586,12 @@ namespace RepoDb.StatementBuilders
             if (orderBy != null)
             {
                 // Check if the order fields are present in the given fields
-                var unmatchesOrderFields = orderBy?.Where(orderField =>
-                    fields?.FirstOrDefault(f =>
+                var unmatchesOrderFields = orderBy.Where(orderField =>
+                    fields.FirstOrDefault(f =>
                         string.Equals(orderField.Name, f.Name, StringComparison.OrdinalIgnoreCase)) == null);
 
                 // Throw an error we found any unmatches
-                if (unmatchesOrderFields?.Any() == true)
+                if (unmatchesOrderFields.Any() == true)
                 {
                     throw new MissingFieldsException($"The order fields '{unmatchesOrderFields.Select(field => field.Name).Join(", ")}' are not " +
                         $"present at the given fields '{fields.Select(field => field.Name).Join(", ")}'.");

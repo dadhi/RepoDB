@@ -9,7 +9,7 @@ using System.Reflection;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the properties of the data entity.
+    /// A class that is being used to cache the properties of the data entity.
     /// </summary>
     public static class PropertyCache
     {
@@ -123,11 +123,10 @@ namespace RepoDb
             }
 
             // Variables
-            var properties = (IEnumerable<ClassProperty>)null;
             var key = GenerateHashCode(entityType);
 
             // Try get the value
-            if (cache.TryGetValue(key, out properties) == false)
+            if (cache.TryGetValue(key, out var properties) == false)
             {
                 properties = entityType.GetClassProperties().AsList();
                 cache.TryAdd(key, properties);

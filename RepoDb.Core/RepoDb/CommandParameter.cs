@@ -4,29 +4,29 @@ using System.Data.Common;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to hold the definition of the <see cref="DbCommand"/> parameters.
+    /// A class that is being used to hold the definition of the <see cref="DbCommand"/> parameters.
     /// </summary>
     internal class CommandParameter
     {
         /// <summary>
         /// Creates a new instance of <see cref="CommandParameter"/> class.
         /// </summary>
-        /// <param name="name">The name of the parameter.</param>
+        /// <param name="field">The <see cref="Field"/> object that is connected.</param>
         /// <param name="value">The value of the parameter.</param>
         /// <param name="mappedToType">The parent type where this parameter is mapped.</param>
-        public CommandParameter(string name,
+        public CommandParameter(Field field,
             object value,
             Type mappedToType)
         {
-            Name = name;
+            Field = field;
             Value = value;
             MappedToType = mappedToType;
         }
 
         /// <summary>
-        /// The name of the parameter.
+        /// The field that is connected.
         /// </summary>
-        public string Name { get; set; }
+        public Field Field { get; set; }
 
         /// <summary>
         /// The value of the parameter.

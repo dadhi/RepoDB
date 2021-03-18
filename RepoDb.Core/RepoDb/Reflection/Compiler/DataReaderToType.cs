@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Data.Common;
-using System.Data;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
 using RepoDb.Interfaces;
-using System.Threading.Tasks;
 using RepoDb.Extensions;
 using FastExpressionCompiler;
 
@@ -14,7 +12,7 @@ namespace RepoDb.Reflection
     internal partial class Compiler
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="reader"></param>
@@ -44,7 +42,7 @@ namespace RepoDb.Reflection
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="reader"></param>
@@ -75,7 +73,7 @@ namespace RepoDb.Reflection
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="reader"></param>
@@ -97,12 +95,29 @@ namespace RepoDb.Reflection
             // Throw an error if there are no bindings
             if (arguments?.Any() != true && memberAssignments?.Any() != true)
             {
-                throw new InvalidOperationException($"There are no 'contructor parameter' and/or 'property member' bindings found between the resultset of the data reader and the type '{typeOfResult.FullName}'.");
+                throw new InvalidOperationException($"There are no 'constructor parameter' and/or 'property member' bindings found between the resultset of the data reader and the type '{typeOfResult.FullName}'. " +
+                    $"Make sure the 'constructor arguments' and/or 'model properties' are matching the list of the fields returned by the data reader object.");
             }
 
             // Initialize the members
             var constructorInfo = typeOfResult.GetConstructorWithMostArguments();
             var entityExpression = (Expression)null;
+
+            // Validate arguments equality
+            if (arguments?.Any() == true)
+            {
+                var parameters = constructorInfo.GetParameters();
+                var unmatches = parameters
+                    .Where(e => memberBindings.FirstOrDefault(binding => binding.Argument != null &&
+                        string.Equals(binding.ParameterInfo?.Name, e.Name, StringComparison.OrdinalIgnoreCase)) == null);
+
+                // Throw the detailed message
+                if (unmatches?.Any() == true)
+                {
+                    var unmatchesNames = unmatches.Select(e => e.Name).Join(",");
+                    throw new MissingMemberException($"The following ctor arguments ('{unmatchesNames}') for type '{typeOfResult.FullName}' are not matching from any of the resultset fields returned by the data reader object.");
+                }
+            }
 
             try
             {

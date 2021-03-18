@@ -12,6 +12,7 @@ namespace RepoDb.UnitTests.Equalities
         private class EntityClass
         {
             public int Id { get; set; }
+            public int Value { get; set; }
             public string Name { get; set; }
         }
 
@@ -113,6 +114,20 @@ namespace RepoDb.UnitTests.Equalities
 
             // Assert
             Assert.IsTrue(equal);
+        }
+
+        [TestMethod]
+        public void TestQueryGroupHashCodeEqualityForCollidedExpressions()
+        {
+            // Prepare
+            var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+
+            // Act
+            var equal = (objA.GetHashCode() == objB.GetHashCode());
+
+            // Assert
+            Assert.IsFalse(equal);
         }
 
         [TestMethod]
@@ -412,6 +427,20 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
+        public void TestQueryGroupObjectEqualityForCollidedExpressions()
+        {
+            // Prepare
+            var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+
+            // Act
+            var equal = (objA == objB);
+
+            // Assert
+            Assert.IsFalse(equal);
+        }
+
+        [TestMethod]
         public void TestQueryGroupObjectEqualityForExpressionsWithDifferentUnaryValue()
         {
             // Prepare
@@ -610,7 +639,7 @@ namespace RepoDb.UnitTests.Equalities
         #region Equals(Object, Object)
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForDynamics()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForDynamics()
         {
             // Prepare
             var objA = QueryGroup.Parse(new { Id = 1 });
@@ -624,7 +653,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForQueryFields()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForQueryFields()
         {
             // Prepare
             var objA = new QueryGroup(new QueryField("Id", 1).AsEnumerable());
@@ -638,7 +667,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForQueryFieldsWithSameConjuntion()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForQueryFieldsWithSameConjuntion()
         {
             // Prepare
             var objA = new QueryGroup(new QueryField("Id", 1).AsEnumerable(), Conjunction.And);
@@ -652,7 +681,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForQueryFieldsWithDifferentConjuntion()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForQueryFieldsWithDifferentConjuntion()
         {
             // Prepare
             var objA = new QueryGroup(new QueryField("Id", 1).AsEnumerable(), Conjunction.And);
@@ -666,7 +695,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForQueryFieldsWithSameIsNot()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForQueryFieldsWithSameIsNot()
         {
             // Prepare
             var objA = new QueryGroup(new QueryField("Id", 1).AsEnumerable(), true);
@@ -680,7 +709,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForQueryFieldsWithDifferentIsNot()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForQueryFieldsWithDifferentIsNot()
         {
             // Prepare
             var objA = new QueryGroup(new QueryField("Id", 1).AsEnumerable(), true);
@@ -694,7 +723,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForExpressions()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForExpressions()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1);
@@ -708,7 +737,21 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForExpressionsWithDifferentUnaryValue()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForCollidedExpressions()
+        {
+            // Prepare
+            var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+
+            // Act
+            var equal = Equals(objA, objB);
+
+            // Assert
+            Assert.IsFalse(equal);
+        }
+
+        [TestMethod]
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForExpressionsWithDifferentUnaryValue()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(c => !c.Name.Contains("Name1"));
@@ -722,7 +765,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodForExpressionsWithDifferentBooleanValue()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodForExpressionsWithDifferentBooleanValue()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(c => c.Name.Contains("Name1") == true);
@@ -736,7 +779,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForDynamics()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForDynamics()
         {
             // Prepare
             var objA = QueryGroup.Parse(new { Id = 1, Name = "Name1" });
@@ -750,7 +793,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForQueryFields()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForQueryFields()
         {
             // Prepare
             var objA = new QueryGroup(new[]
@@ -772,7 +815,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForQueryFieldsWithSameConjunction()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForQueryFieldsWithSameConjunction()
         {
             // Prepare
             var objA = new QueryGroup(new[]
@@ -794,7 +837,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForQueryFieldsWithDifferentConjunction()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForQueryFieldsWithDifferentConjunction()
         {
             // Prepare
             var objA = new QueryGroup(new[]
@@ -816,7 +859,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForQueryFieldsWithSameIsNot()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForQueryFieldsWithSameIsNot()
         {
             // Prepare
             var objA = new QueryGroup(new[]
@@ -838,7 +881,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForQueryFieldsWithDifferentIsNot()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForQueryFieldsWithDifferentIsNot()
         {
             // Prepare
             var objA = new QueryGroup(new[]
@@ -860,7 +903,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForExpressions()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForExpressions()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(e => e.Id == 1 && e.Name == "Name1");
@@ -874,7 +917,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForExpressionsWithDifferentUnaryValue()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForExpressionsWithDifferentUnaryValue()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(e => e.Id == 1 && !e.Name.Contains("Name1"));
@@ -888,7 +931,7 @@ namespace RepoDb.UnitTests.Equalities
         }
 
         [TestMethod]
-        public void TestQueryGroupObjectEqualityViaEqualMethodWithMultipleFieldsForExpressionsWithDifferentBooleanValue()
+        public void TestQueryGroupObjectEqualityViaEqualsMethodWithMultipleFieldsForExpressionsWithDifferentBooleanValue()
         {
             // Prepare
             var objA = QueryGroup.Parse<EntityClass>(e => e.Id == 1 && e.Name.Contains("Name1") == true);
@@ -1015,6 +1058,22 @@ namespace RepoDb.UnitTests.Equalities
 
             // Assert
             Assert.IsTrue(equal);
+        }
+
+        [TestMethod]
+        public void TestQueryGroupArrayListContainabilityForCollidedExpressions()
+        {
+            // Prepare
+            var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+            var list = new ArrayList();
+
+            // Act
+            list.Add(objA);
+            var equal = list.Contains(objB);
+
+            // Assert
+            Assert.IsFalse(equal);
         }
 
         [TestMethod]
@@ -1347,6 +1406,22 @@ namespace RepoDb.UnitTests.Equalities
 
             // Assert
             Assert.IsTrue(equal);
+        }
+
+        [TestMethod]
+        public void TestQueryGroupGenericListContainabilityForCollidedExpressions()
+        {
+            // Prepare
+            var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+            var list = new List<QueryGroup>();
+
+            // Act
+            list.Add(objA);
+            var equal = list.Contains(objB);
+
+            // Assert
+            Assert.IsFalse(equal);
         }
 
         [TestMethod]

@@ -2,13 +2,15 @@
 using RepoDb.Enumerations;
 using RepoDb.Extensions;
 using System;
+using System.Collections;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to define a field expression for the query operation. It holds the instances of the <see cref="RepoDb.Field"/>,
+    /// A class that is being used to define a field expression for the query operation. It holds the instances of the <see cref="RepoDb.Field"/>,
     /// <see cref="RepoDb.Parameter"/> and the <see cref="Enumerations.Operation"/> objects of the query expression.
     /// </summary>
     public partial class QueryField : IEquatable<QueryField>
@@ -89,7 +91,7 @@ namespace RepoDb
             : this(new Field(fieldName),
                   operation,
                   value,
-                  false)
+                  appendUnderscore)
         { }
 
         /// <summary>
@@ -128,6 +130,11 @@ namespace RepoDb
         /// </summary>
         public Parameter Parameter { get; }
 
+        /// <summary>
+        /// Gets the in-used instance of database parameter object.
+        /// </summary>
+        public IDbDataParameter DbParameter { get; set; }
+
         #endregion
 
         #region Methods
@@ -139,6 +146,31 @@ namespace RepoDb
         {
             Parameter?.PrependAnUnderscore();
         }
+
+        /// <summary>
+        /// Returns the name of the <see cref="Field"/> object current in used.
+        /// </summary>
+        public string GetName() =>
+            Field?.Name;
+
+        /// <summary>
+        /// Returns the value of the <see cref="Parameter"/> object currently in used. However, if this instance of object has already been used as a database parameter 
+        /// with <see cref="DbParameter.Direction"/> equals to <see cref="System.Data.ParameterDirection.Output"/> via <see cref="DirectionalQueryField"/> 
+        /// object, then the value of the in-used <see cref="IDbDataParameter"/> object will be returned.
+        /// </summary>
+        /// <returns>The value of the <see cref="Parameter"/> object.</returns>
+        public object GetValue() =>
+            GetValue<object>();
+
+        /// <summary>
+        /// Returns the value of the <see cref="Parameter"/> object currently in used. However, if this instance of object has already been used as a database parameter 
+        /// with <see cref="DbParameter.Direction"/> equals to <see cref="System.Data.ParameterDirection.Output"/> via <see cref="DirectionalQueryField"/> 
+        /// object, then the value of the in-used <see cref="IDbDataParameter"/> object will be returned.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The value of the converted <see cref="Parameter"/> object.</returns>
+        public T GetValue<T>() =>
+            Converter.ToType<T>(DbParameter?.Value ?? Parameter?.Value);
 
         /// <summary>
         /// Make the current instance of <see cref="QueryField"/> object to become an expression for 'Update' operations.
@@ -153,7 +185,8 @@ namespace RepoDb
         /// </summary>
         public void Reset()
         {
-            Parameter?.SetName(Field.Name);
+            Parameter?.Reset();
+            DbParameter = null;
             operationTextAttribute = null;
             hashCode = null;
         }
@@ -164,13 +197,10 @@ namespace RepoDb
         /// <returns>A string instance containing the value of the <see cref="TextAttribute"/> text property.</returns>
         public string GetOperationText()
         {
-            if (operationTextAttribute == null)
-            {
-                operationTextAttribute = StaticType.Operation
-                    .GetMembers()
-                    .First(member => string.Equals(member.Name, Operation.ToString(), StringComparison.OrdinalIgnoreCase))
-                    .GetCustomAttribute<TextAttribute>();
-            }
+            operationTextAttribute ??= StaticType.Operation
+                .GetMembers()
+                .First(member => string.Equals(member.Name, Operation.ToString(), StringComparison.OrdinalIgnoreCase))
+                .GetCustomAttribute<TextAttribute>();
             return operationTextAttribute.Text;
         }
 
@@ -215,14 +245,18 @@ namespace RepoDb
             }
             // The parameter's length affects the uniqueness of the object
             else if ((Operation == Operation.In || Operation == Operation.NotIn) &&
-                Parameter.Value != null && Parameter.Value is System.Collections.IEnumerable)
+                Parameter.Value != null && Parameter.Value is IEnumerable enumerable)
             {
-                var items = ((System.Collections.IEnumerable)Parameter.Value);
+                var items = enumerable;
                 hashCode += items
                     .WithType<object>()
                     .Count()
                     .GetHashCode();
             }
+            // The string representation affects the collision
+            // var objA = QueryGroup.Parse<EntityClass>(c => c.Id == 1 && c.Value != 1);
+            // var objB = QueryGroup.Parse<EntityClass>(c => c.Id != 1 && c.Value == 1);
+            hashCode += string.Concat(Field.Name, GetOperationText()).GetHashCode();
 
             // Set and return the hashcode
             return (this.hashCode = hashCode).Value;

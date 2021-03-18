@@ -10,7 +10,7 @@ using System.Linq;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the compiled functions.
+    /// A class that is being used to cache the compiled functions.
     /// </summary>
     internal static class FunctionCache
     {
@@ -75,9 +75,8 @@ namespace RepoDb
                 IEnumerable<DbField> dbFields = null,
                 IDbSetting dbSetting = null)
             {
-                var result = (Func<DbDataReader, TResult>)null;
                 var key = GetKey(reader);
-                if (cache.TryGetValue(key, out result) == false)
+                if (cache.TryGetValue(key, out var result) == false)
                 {
                     result = FunctionFactory.CompileDataReaderToType<TResult>(reader, dbFields, dbSetting);
                     cache.TryAdd(key, result);
@@ -132,9 +131,8 @@ namespace RepoDb
                 IEnumerable<DbField> dbFields = null,
                 IDbSetting dbSetting = null)
             {
-                var result = (Func<DbDataReader, dynamic>)null;
                 var key = GetKey(reader);
-                if (cache.TryGetValue(key, out result) == false)
+                if (cache.TryGetValue(key, out var result) == false)
                 {
                     result = FunctionFactory.CompileDataReaderToExpandoObject(reader, dbFields, dbSetting);
                     cache.TryAdd(key, result);
@@ -197,9 +195,8 @@ namespace RepoDb
                 IEnumerable<DbField> outputFields,
                 IDbSetting dbSetting = null)
             {
-                var func = (Action<DbCommand, TEntity>)null;
                 var key = GetKey(cacheKey, inputFields, outputFields);
-                if (cache.TryGetValue(key, out func) == false)
+                if (cache.TryGetValue(key, out var func) == false)
                 {
                     if (typeof(TEntity).IsDictionaryStringObject())
                     {
@@ -293,9 +290,8 @@ namespace RepoDb
                 int batchSize,
                 IDbSetting dbSetting = null)
             {
-                var func = (Action<DbCommand, IList<TEntity>>)null;
                 var key = GetKey(cacheKey, inputFields, outputFields, batchSize);
-                if (cache.TryGetValue(key, out func) == false)
+                if (cache.TryGetValue(key, out var func) == false)
                 {
                     if (typeof(TEntity).IsDictionaryStringObject())
                     {
@@ -391,8 +387,7 @@ namespace RepoDb
             {
                 var key = (long)typeof(TEntity).GetHashCode() + field.GetHashCode() +
                     parameterName.GetHashCode() + index.GetHashCode();
-                var func = (Action<TEntity, DbCommand>)null;
-                if (cache.TryGetValue(key, out func) == false)
+                if (cache.TryGetValue(key, out var func) == false)
                 {
                     func = FunctionFactory.CompileDbCommandToProperty<TEntity>(field, parameterName, index, dbSetting);
                     cache.TryAdd(key, func);
@@ -436,10 +431,9 @@ namespace RepoDb
             internal static Action<TEntity, object> Get(Field field)
             {
                 var key = (long)typeof(TEntity).GetHashCode() + field.GetHashCode();
-                var func = (Action<TEntity, object>)null;
-                if (cache.TryGetValue(key, out func) == false)
+                if (cache.TryGetValue(key, out var func) == false)
                 {
-                    if(typeof(TEntity).IsDictionaryStringObject())
+                    if (typeof(TEntity).IsDictionaryStringObject())
                     {
                         func = FunctionFactory.CompileDictionaryStringObjectItemSetter<TEntity>(field);
                     }
@@ -462,12 +456,14 @@ namespace RepoDb
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="paramType"></param>
+        /// <param name="entityType"></param>
         /// <param name="dbFields"></param>
         /// <returns></returns>
-        internal static Action<DbCommand, object> GetPlainTypeToDbParametersCompiledFunction(Type type,
+        internal static Action<DbCommand, object> GetPlainTypeToDbParametersCompiledFunction(Type paramType,
+            Type entityType,
             IEnumerable<DbField> dbFields = null) =>
-            PlainTypeToDbParametersCompiledFunctionCache.Get(type, dbFields);
+            PlainTypeToDbParametersCompiledFunctionCache.Get(paramType, entityType, dbFields);
 
         #region PlainTypeToDbParametersCompiledFunctionCache
 
@@ -481,23 +477,24 @@ namespace RepoDb
             /// <summary>
             /// 
             /// </summary>
-            /// <param name="type"></param>
+            /// <param name="paramType"></param>
+            /// <param name="entityType"></param>
             /// <param name="dbFields"></param>
             /// <returns></returns>
-            internal static Action<DbCommand, object> Get(Type type,
-            IEnumerable<DbField> dbFields = null)
+            internal static Action<DbCommand, object> Get(Type paramType,
+                Type entityType,
+                IEnumerable<DbField> dbFields = null)
             {
-                if (type == null)
+                if (paramType == null)
                 {
                     return null;
                 }
-                var key = type.GetHashCode();
-                var func = (Action<DbCommand, object>)null;
-                if (cache.TryGetValue(key, out func) == false)
+                var key = paramType.GetHashCode() + Convert.ToInt32(entityType?.GetHashCode());
+                if (cache.TryGetValue(key, out var func) == false)
                 {
-                    if (type.IsPlainType())
+                    if (paramType.IsPlainType())
                     {
-                        func = FunctionFactory.GetPlainTypeToDbParametersCompiledFunction(type, dbFields);
+                        func = FunctionFactory.GetPlainTypeToDbParametersCompiledFunction(paramType, entityType, dbFields);
                     }
                     cache.TryAdd(key, func);
                 }

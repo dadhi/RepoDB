@@ -367,9 +367,9 @@ namespace RepoDb.MySqlConnector.UnitTests
                 3,
                 null,
                 new DbField("Id", false, true, false, typeof(int), null, null, null, null));
-            var expected = "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name, @Address ) ; SELECT LAST_INSERT_ID() ; " +
-                "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name_1, @Address_1 ) ; SELECT LAST_INSERT_ID() ; " +
-                "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name_2, @Address_2 ) ; SELECT LAST_INSERT_ID() ;";
+            var expected = "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name, @Address ) ; SELECT LAST_INSERT_ID() AS `Id`, @__RepoDb_OrderColumn_0 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name_1, @Address_1 ) ; SELECT LAST_INSERT_ID() AS `Id`, @__RepoDb_OrderColumn_1 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Name`, `Address` ) VALUES ( @Name_2, @Address_2 ) ; SELECT LAST_INSERT_ID() AS `Id`, @__RepoDb_OrderColumn_2 AS `OrderColumn` ;";
 
             // Assert
             Assert.AreEqual(expected, query);
@@ -661,21 +661,6 @@ namespace RepoDb.MySqlConnector.UnitTests
                 null);
         }
 
-        [TestMethod, ExpectedException(typeof(InvalidQualifiersException))]
-        public void ThrowExceptionOnMySqlStatementBuilderCreateMergeIfThereAreOtherFieldsAsQualifers()
-        {
-            // Setup
-            var builder = StatementBuilderMapper.Get<MySqlConnection>();
-
-            // Act
-            builder.CreateMerge(new QueryBuilder(),
-                "Table",
-                Field.From("Id", "Name", "Address"),
-                Field.From("Id", "Name"),
-                new DbField("Id", true, false, false, typeof(int), null, null, null, null),
-                null);
-        }
-
         [TestMethod, ExpectedException(typeof(NotSupportedException))]
         public void ThrowExceptionOnMySqlStatementBuilderCreateMergeIfThereAreHints()
         {
@@ -710,9 +695,9 @@ namespace RepoDb.MySqlConnector.UnitTests
                 3,
                 new DbField("Id", true, false, false, typeof(int), null, null, null, null),
                 null);
-            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Result` ;";
+            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_0 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_1 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_2 AS `OrderColumn` ;";
 
             // Assert
             Assert.AreEqual(expected, query);
@@ -732,9 +717,9 @@ namespace RepoDb.MySqlConnector.UnitTests
                 3,
                 new DbField("Id", true, false, false, typeof(int), null, null, null, null),
                 null);
-            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Result` ;";
+            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_0 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_1 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_2 AS `OrderColumn` ;";
 
             // Assert
             Assert.AreEqual(expected, query);
@@ -754,9 +739,9 @@ namespace RepoDb.MySqlConnector.UnitTests
                 3,
                 new DbField("Id", true, false, false, typeof(int), null, null, null, null),
                 new DbField("Id", false, true, false, typeof(int), null, null, null, null));
-            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Result` ; " +
-                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Result` ;";
+            var expected = "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id, @Name, @Address ) ON DUPLICATE KEY UPDATE `Id` = @Id, `Name` = @Name, `Address` = @Address ; SELECT COALESCE(@Id, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_0 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_1, @Name_1, @Address_1 ) ON DUPLICATE KEY UPDATE `Id` = @Id_1, `Name` = @Name_1, `Address` = @Address_1 ; SELECT COALESCE(@Id_1, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_1 AS `OrderColumn` ; " +
+                "INSERT INTO `Table` ( `Id`, `Name`, `Address` ) VALUES ( @Id_2, @Name_2, @Address_2 ) ON DUPLICATE KEY UPDATE `Id` = @Id_2, `Name` = @Name_2, `Address` = @Address_2 ; SELECT COALESCE(@Id_2, LAST_INSERT_ID()) AS `Id`, @__RepoDb_OrderColumn_2 AS `OrderColumn` ;";
 
             // Assert
             Assert.AreEqual(expected, query);
@@ -791,22 +776,6 @@ namespace RepoDb.MySqlConnector.UnitTests
                 null,
                 3,
                 null,
-                null);
-        }
-
-        [TestMethod, ExpectedException(typeof(InvalidQualifiersException))]
-        public void ThrowExceptionOnMySqlStatementBuilderCreateMergeAllIfThereAreOtherFieldsAsQualifers()
-        {
-            // Setup
-            var builder = StatementBuilderMapper.Get<MySqlConnection>();
-
-            // Act
-            builder.CreateMergeAll(new QueryBuilder(),
-                "Table",
-                Field.From("Id", "Name", "Address"),
-                Field.From("Id", "Name"),
-                3,
-                new DbField("Id", true, false, false, typeof(int), null, null, null, null),
                 null);
         }
 

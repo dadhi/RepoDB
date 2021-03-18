@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to cache the identity property of the data entity.
+    /// A class that is being used to cache the identity property of the data entity.
     /// </summary>
     public static class IdentityCache
     {
@@ -34,10 +34,9 @@ namespace RepoDb
         {
             // Variables for the cache
             var key = GenerateHashCode(entityType);
-            var property = (ClassProperty)null;
 
             // Try get the value
-            if (cache.TryGetValue(key, out property) == false)
+            if (cache.TryGetValue(key, out var property) == false)
             {
                 property = resolver.Resolve(entityType);
                 cache.TryAdd(key, property);

@@ -8,7 +8,7 @@ using System.Data.Common;
 namespace RepoDb
 {
     /// <summary>
-    /// A class that is used to map a type of <see cref="DbConnection"/> into an instance of <see cref="IDbSetting"/> object.
+    /// A class that is being used to map a type of <see cref="DbConnection"/> into an instance of <see cref="IDbSetting"/> object.
     /// </summary>
     public static class DbSettingMapper
     {
@@ -33,7 +33,7 @@ namespace RepoDb
         public static void Add<TDbConnection>(IDbSetting dbSetting,
             bool @override)
             where TDbConnection : DbConnection =>
-            Add(StaticType.DbConnection, dbSetting, @override);
+            Add(typeof(TDbConnection), dbSetting, @override);
 
         /// <summary>
         /// Adds a mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IDbSetting"/> object.
@@ -50,10 +50,9 @@ namespace RepoDb
 
             // Variables for cache
             var key = GenerateHashCode(connectionType);
-            var existing = (IDbSetting)null;
 
             // Try get the mappings
-            if (maps.TryGetValue(key, out existing))
+            if (maps.TryGetValue(key, out var existing))
             {
                 if (@override)
                 {
@@ -96,11 +95,8 @@ namespace RepoDb
             // Guard the type
             Guard(connectionType);
 
-            // Variables for the cache
-            var value = (IDbSetting)null;
-
             // get the value
-            maps.TryGetValue(GenerateHashCode(connectionType), out value);
+            maps.TryGetValue(GenerateHashCode(connectionType), out var value);
 
             // Return the value
             return value;
@@ -116,7 +112,7 @@ namespace RepoDb
         /// <typeparam name="TDbConnection">The type of <see cref="DbConnection"/>.</typeparam>
         public static void Remove<TDbConnection>()
             where TDbConnection : DbConnection =>
-            Remove(StaticType.DbConnection);
+            Remove(typeof(TDbConnection));
 
         /// <summary>
         /// Removes the mapping between the type of <see cref="DbConnection"/> and an instance of <see cref="IDbSetting"/> object.
@@ -169,7 +165,7 @@ namespace RepoDb
         }
 
         /// <summary>
-        /// Throws an exception if the type is not a sublcass of type <see cref="DbConnection"/>.
+        /// Throws an exception if the type is not a subclass of type <see cref="DbConnection"/>.
         /// </summary>
         private static void Guard(Type type)
         {

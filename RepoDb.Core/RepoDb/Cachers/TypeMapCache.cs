@@ -46,10 +46,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(type);
-            var result = (DbType?)null;
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 result = typeLevelResolver.Resolve(type);
                 cache.TryAdd(key, result);
@@ -101,7 +100,7 @@ namespace RepoDb
         /// <returns>The mapped <see cref="DbType"/> object of the property.</returns>
         internal static DbType? Get<TEntity>(PropertyInfo propertyInfo)
             where TEntity : class =>
-            Get(typeof(TEntity), propertyInfo);
+            Get(typeof(TEntity), propertyInfo) ?? Get(propertyInfo.PropertyType);
 
         /// <summary>
         /// Property Level: Gets the cached <see cref="DbType"/> object that is being mapped on a specific <see cref="PropertyInfo"/> object.
@@ -117,10 +116,9 @@ namespace RepoDb
 
             // Variables
             var key = GenerateHashCode(entityType, propertyInfo);
-            var result = (DbType?)null;
 
             // Try get the value
-            if (cache.TryGetValue(key, out result) == false)
+            if (cache.TryGetValue(key, out var result) == false)
             {
                 result = propertyLevelResolver.Resolve(propertyInfo);
                 cache.TryAdd(key, result);

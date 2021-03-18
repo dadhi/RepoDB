@@ -59,13 +59,10 @@ namespace RepoDb
         /// <returns>The string containing the text value of the ordering direction.</returns>
         public string GetOrderText()
         {
-            if (orderTextAttribute == null)
-            {
-                orderTextAttribute = typeof(Order)
-                    .GetMembers()
-                    .First(member => string.Equals(member.Name, Order.ToString(), StringComparison.OrdinalIgnoreCase))
-                    .GetCustomAttribute<TextAttribute>();
-            }
+            orderTextAttribute ??= typeof(Order)
+                .GetMembers()
+                .First(member => string.Equals(member.Name, Order.ToString(), StringComparison.OrdinalIgnoreCase))
+                .GetCustomAttribute<TextAttribute>();
             return orderTextAttribute.Text;
         }
 
@@ -97,7 +94,7 @@ namespace RepoDb
             {
                 return Parse<TEntity>(expression.Body.ToBinary(), order);
             }
-            throw new InvalidExpressionException($"Expression '{expression.ToString()}' is invalid.");
+            throw new InvalidExpressionException($"Expression '{expression}' is invalid.");
         }
 
         /// <summary>
@@ -120,7 +117,7 @@ namespace RepoDb
             {
                 return Parse<TEntity>(expression.Operand.ToBinary(), order);
             }
-            throw new InvalidExpressionException($"Expression '{expression.ToString()}' is invalid.");
+            throw new InvalidExpressionException($"Expression '{expression}' is invalid.");
         }
 
         /// <summary>
@@ -134,7 +131,7 @@ namespace RepoDb
         internal static OrderField Parse<TEntity>(MemberExpression expression,
             Order order)
             where TEntity : class =>
-            new OrderField(expression.ToMember().Member.Name, order);
+            new OrderField(expression.ToMember().Member.GetMappedName(), order);
 
         /// <summary>
         /// Parses a property from the data entity object based on the given <see cref="BinaryExpression"/> and converts the result 
@@ -188,10 +185,10 @@ namespace RepoDb
             {
                 if (property.PropertyType != typeof(Order))
                 {
-                    throw new InvalidTypeException($"The type of field '{property.Name}' must be of '{typeof(Order).FullName}'.");
+                    throw new InvalidTypeException($"The type of field '{property.GetMappedName()}' must be of '{typeof(Order).FullName}'.");
                 }
                 var order = (Order)property.GetValue(obj);
-                list.Add(new OrderField(property.Name, order));
+                list.Add(new OrderField(property.GetMappedName(), order));
             }
             return list;
         }
