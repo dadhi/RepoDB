@@ -70,7 +70,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Action<DbCommand, TEntity>>(Expression.Block(bodyExpressions), commandParameterExpression, entityParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

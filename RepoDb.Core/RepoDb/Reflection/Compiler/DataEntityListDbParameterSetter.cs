@@ -54,7 +54,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Action<DbCommand, IList<TEntity>>>(Expression.Block(bodyExpressions), commandParameterExpression, entitiesParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

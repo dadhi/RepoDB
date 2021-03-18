@@ -49,7 +49,7 @@ namespace RepoDb.Reflection
             // Compile
             return Expression
                 .Lambda<Action<DbCommand, TEntity>>(Expression.Block(bodyExpressions), commandParameterExpression, entityParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

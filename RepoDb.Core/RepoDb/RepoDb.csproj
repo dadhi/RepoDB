@@ -46,10 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\FastExpressionCompiler\src\FastExpressionCompiler\FastExpressionCompiler.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="ClassMap.cs" />
     <Compile Remove="Contexts\Execution\InsertAllExecutionContextCache.cs" />
     <Compile Remove="Contexts\Execution\InsertExecutionContextCache.cs" />
@@ -84,6 +80,7 @@
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
+    <PackageReference Include="FastExpressionCompiler" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -74,7 +74,7 @@ namespace RepoDb.Reflection
             // Return
             return Expression
                 .Lambda<Action<DbCommand, object>>(Expression.Block(callExpressions), commandParameterExpression, entityParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

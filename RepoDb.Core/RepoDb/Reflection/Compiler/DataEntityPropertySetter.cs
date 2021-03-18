@@ -81,7 +81,7 @@ namespace RepoDb.Reflection
             // Return function
             return Expression.Lambda<Action<TEntity, object>>(propertyAssignment,
                 entityParameter, valueParameter)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

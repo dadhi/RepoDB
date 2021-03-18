@@ -116,7 +116,7 @@ namespace RepoDb
                 // Set the function value
                 return Expression
                     .Lambda<Func<TEntity, TResult>>(body, obj)
-                    .CompileFast(true);
+                    .CompileFast();
             }
 
             /// <summary>
@@ -202,7 +202,7 @@ namespace RepoDb
                 var body = Expression.Constant(DataEntityExtension.GetProperties<TEntity>());
                 return Expression
                     .Lambda<Func<IEnumerable<ClassProperty>>>(body)
-                    .CompileFast(true);
+                    .CompileFast();
             }
 
             /// <summary>
@@ -278,7 +278,7 @@ namespace RepoDb
                 // Set the function value
                 var lambdaExpr = Expression.Lambda<Func<TEntity, IEnumerable<PropertyValue>>>(body, obj);
                 var lambda = lambdaExpr
-                    .CompileFast(true);
+                    .CompileFast();
                 return lambda;
             }
 

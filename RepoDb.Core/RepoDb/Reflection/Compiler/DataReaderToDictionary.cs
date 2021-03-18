@@ -40,7 +40,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Func<DbDataReader, ExpandoObject>>(body, readerParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }

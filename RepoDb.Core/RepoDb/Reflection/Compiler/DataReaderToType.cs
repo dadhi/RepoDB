@@ -71,7 +71,7 @@ namespace RepoDb.Reflection
             // Return
             return Expression
                 .Lambda<Func<DbDataReader, TResult>>(expression, readerParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace RepoDb.Reflection
             // Set the function value
             return Expression
                 .Lambda<Func<DbDataReader, TResult>>(entityExpression, readerParameterExpression)
-                .CompileFast(true);
+                .CompileFast();
         }
     }
 }
